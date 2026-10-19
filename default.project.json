@@ -1,0 +1,18 @@
+{
+  "name": "FILAMENT Fishing",
+  "tree": {
+    "$className": "DataModel",
+    "Workspace": {
+      "$properties": {"FilteringEnabled": true, "StreamingEnabled": false, "Gravity": 196.2},
+      "World": {"$path": "src/world.model.json"}
+    },
+    "ReplicatedStorage": {"Shared": {"$path": "src/shared"}},
+    "ServerScriptService": {"Server": {"$path": "src/server"}},
+    "StarterPlayer": {
+      "$properties": {"CameraMinZoomDistance": 8, "CameraMaxZoomDistance": 60, "CharacterWalkSpeed": 20},
+      "StarterPlayerScripts": {"Client": {"$path": "src/client"}}
+    },
+    "Lighting": {"$properties": {"ClockTime": 14, "Brightness": 2, "Ambient": [0.55, 0.65, 0.68], "OutdoorAmbient": [0.6, 0.7, 0.75]}},
+    "SoundService": {"$properties": {"RespectFilteringEnabled": true}}
+  }
+}

@@ -1,0 +1,35 @@
+PASS All catch rewards reachable with configured 5% egg probability
+PASS Unique item award cannot be replayed
+PASS Inventory bound prevents overflows
+PASS Sell is exactly once and credits correct coins
+PASS Placed fish cannot be sold or consumed until retrieved
+PASS Premium feed recipe consumes exactly one eligible fish
+PASS Two profiles cannot operate each other's identifiers
+PASS Tank capacity and upgrades enforce costs and limits
+PASS Egg placement validates feed before consuming or starting
+PASS Unfed egg uses 60 seconds and hatch frees tank capacity
+PASS Offline elapsed time hatches once without reroll on reconnect
+PASS Higher feed and level improve both upper-rarity probabilities
+PASS Incubation time influences odds and placement snapshots level
+PASS All three pets reachable including legendary at level one
+PASS Only pets equip; one slot; buff reaches actual fishing simulation
+PASS Server charge duration bounds power and waits for flight then bite
+PASS One resistance gate and valid taps allow full catch
+PASS Late or spammed resistance taps cannot win
+PASS Hold expires, stalls cannot jump progress, stale sessions expire
+PASS Lease prevents simultaneous owners and expired writers
+PASS Lease supports same-revision retries and rejects old revisions
+PASS Schema validation refuses future or malformed data
+PASS Responsive containers fit portrait, landscape and desktop safe areas
+PASS Korean and English catalogs have matching translation keys
+PASS Persistent profile commits before exposing data; reload restores inventory
+PASS Transient failure retries; ambiguous commit does not duplicate reward
+PASS Persistent failure freezes session without exposing unsaved candidate
+PASS Busy transactions reject concurrent item consumption
+PASS Studio temporary mode never accesses a cloud key
+PASS Offline hatch persists once across durable reconnects
+
+30 tests passed. Luau logic + mocked storage; NOT Studio execution.
+PASS place structure: 324 instances, 16 aquariums, 15 exact source matches
+PASS spawn, aquarium anchors, script classes, zero external assets required
+XML SHA256: 08fce8323e1712224ed58937413c3df029f75e2252523d77557563d4534d71a4

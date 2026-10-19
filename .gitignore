@@ -1,0 +1,9 @@
+.DS_Store
+*.rbxl.lock
+*.rbxlx.lock
+*.autosave
+*.log
+tools/
+tests/_generated.luau
+build/FILAMENT-source.bundle
+SOURCE_COMMIT.txt
