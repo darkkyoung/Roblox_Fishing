@@ -5,7 +5,7 @@ Roblox용 낚시·수집·개인 수족관·희귀 펫 프로토타입입니다.
 ## 가장 빠르게 실행하기
 
 1. Roblox Studio를 실행합니다.
-2. **파일 → 파일 열기(Ctrl+O)**에서 `build/FILAMENT-Fishing-0.1.rbxl` 또는 `.rbxlx`를 엽니다. 별도로 받은 게임 파일도 그대로 열 수 있습니다.
+2. **파일 → 파일 열기(Ctrl+O)**에서 저장소의 `build/FILAMENT-Fishing-0.1.rbxlx`를 내려받아 엽니다. 별도로 받은 원본 `.rbxl` 게임 파일도 그대로 열 수 있습니다.
 3. **Play(F5)**를 누릅니다. `Run`은 플레이어 캐릭터를 만들지 않으므로 사용하지 마세요.
 4. 화면 위 **낚시터** 버튼을 누릅니다. 낚싯대는 자동으로 장착됩니다. 해제했다면 위의 **낚싯대 장착**, 키보드 **R** 또는 기본 단축바를 사용하세요.
 5. **F키 또는 화면의 캐스팅 버튼을 누르다가 놓으세요.** 입질 뒤 다시 유지하고, 저항 구간에서는 놓았다가 **4초 안에 9번 연타**하세요. 저항을 제거한 뒤 다시 유지하면 잡힙니다.
@@ -112,7 +112,7 @@ docs/                         검증표·실제 테스트 절차·설계
 - 맵 생성기를 다시 실행하면 `src/world.model.json`을 재생성합니다. 지속적인 맵 변경은 생성기에 반영하세요.
 - `rojo build`는 스크립트를 실행하는 것이 아닙니다. 빌드 통과만으로 실제 플레이 성공을 확정할 수 없습니다.
 
-GitHub 새 Private Repository를 만드는 연결 기능과 인증된 GitHub CLI가 이 작업 환경에 없어 원격 저장소 생성·푸시는 수행하지 않았습니다. 독립된 로컬 Git 저장소로 커밋했으며 최종 ZIP의 `SOURCE_COMMIT.txt`와 `build/FILAMENT-source.bundle`에 버전 정보를 포함합니다. 다른 프로젝트는 변경하지 않았습니다.
+소스와 Roblox Studio에서 열 수 있는 `.rbxlx` 빌드는 [GitHub `darkkyoung/Roblox_Fishing`](https://github.com/darkkyoung/Roblox_Fishing) `main`에 등록했습니다. 아스트라가 생성한 로컬 Git SHA `6a38215e947f2ae2f1944bb079d5d67b1c13fd2c`는 원본 출처 기록이며, GitHub 이관 과정에서 **새로운 커밋 SHA**가 생성되었습니다. 원본 ZIP에 있는 `SOURCE_COMMIT.txt`와 `build/FILAMENT-source.bundle`은 별도 산출물이며 소스 트리에는 포함되지 않습니다. 바이너리 `.rbxl`은 원본 배포 파일에서 받을 수 있고, GitHub에 포함된 `.rbxlx`는 Roblox Studio에서 바로 열 수 있습니다. 다른 프로젝트는 변경하지 않았습니다.
 
 ## 검증과 다음 단계
 
