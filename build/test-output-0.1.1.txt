@@ -1,0 +1,47 @@
+PASS All catch rewards reachable with configured 5% egg probability
+PASS Unique item award cannot be replayed
+PASS Inventory bound prevents overflows
+PASS Sell is exactly once and credits correct coins
+PASS Placed fish cannot be sold or consumed until retrieved
+PASS Premium feed recipe consumes exactly one eligible fish
+PASS Two profiles cannot operate each other's identifiers
+PASS Tank capacity and upgrades enforce costs and limits
+PASS Egg placement validates feed before consuming or starting
+PASS Unfed egg uses 60 seconds and hatch frees tank capacity
+PASS Offline elapsed time hatches once without reroll on reconnect
+PASS Higher feed and level improve both upper-rarity probabilities
+PASS Incubation time influences odds and placement snapshots level
+PASS All three pets reachable including legendary at level one
+PASS Only pets equip; one slot; buff reaches actual fishing simulation
+PASS Server charge duration bounds power and waits for flight then bite
+PASS One resistance gate and valid taps allow full catch
+PASS Late or spammed resistance taps cannot win
+PASS Hold expires, stalls cannot jump progress, stale sessions expire
+PASS Lease prevents simultaneous owners and expired writers
+PASS Lease supports same-revision retries and rejects old revisions
+PASS Schema validation refuses future or malformed data
+PASS Responsive containers fit portrait, landscape and desktop safe areas
+PASS Korean and English catalogs have matching translation keys
+PASS Persistent profile commits before exposing data; reload restores inventory
+PASS Transient failure retries; ambiguous commit does not duplicate reward
+PASS Persistent failure freezes session without exposing unsaved candidate
+PASS Busy transactions reject concurrent item consumption
+PASS Studio temporary mode never accesses a cloud key
+PASS Offline hatch persists once across durable reconnects
+
+30 tests passed. Luau logic + mocked storage; NOT Studio execution.
+PASS Idle has no meter, result or waiting panel
+PASS Flight and waiting preserve the center of the world
+PASS Charge, reel and resistance have context-specific meters
+PASS Completion clears gauge and enables only small result
+PASS Bag and native menu exclude all fishing overlays
+PASS Press intent cannot invent rewards or bypass resistance
+PASS Debug travel requires BOTH Studio and explicit configuration
+PASS Fish actions are contextual; placed fish cannot sell or craft
+PASS Incubating eggs have no consume/retrieve actions; pet slot stays exclusive
+PASS Portrait navigation replaces the split pane instead of shrinking it
+PASS Touch action and central meter do not overlap
+PASS Narrow topbar hides optional information and retains the bag
+PASS Ten egg display slots are unique and contained in redesigned tanks
+PASS Revision keeps the established challenge and content balance
+14 presentation tests passed (not Studio rendering).

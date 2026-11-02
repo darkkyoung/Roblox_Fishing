@@ -1,7 +1,7 @@
 --!strict
 -- Test balance only. No Robux or commerce integrations.
 return {
-    Version = "0.1.0",
+    Version = "0.1.1",
     Locale = "ko",
     StudioPersistence = false, -- Explicit opt-in; separate Studio datastore namespace.
     StudioDebug = true, -- Also gated by RunService:IsStudio() on the server.

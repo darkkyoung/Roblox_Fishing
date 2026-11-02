@@ -1,18 +1,18 @@
-# FILAMENT Fishing — Playable Prototype 0.1
+# FILAMENT Fishing — Phase 0.1.1 · 물결 마을
 
-Roblox용 낚시·수집·개인 수족관·희귀 펫 프로토타입입니다. **소스 구현과 Rojo 빌드·자동 검사는 완료했으며, 실제 Roblox Studio 실행·멀티플레이 승인은 아직 수행하지 않았습니다.** 정식 출시용이 아닌 비공개 검수용 빌드입니다.
+기존 0.1의 낚시·수집·부화·펫 규칙을 유지하면서 UI, 월드, 카메라와 시각 효과를 개편한 비공개 검수용 Roblox 프로젝트입니다. **소스 구현과 Rojo 빌드·자동 검사는 완료했으며, 실제 Roblox Studio 실행·멀티플레이 승인은 아직 수행하지 않았습니다.** 정식 출시용이 아닌 비공개 검수용 빌드입니다.
 
 ## 가장 빠르게 실행하기
 
 1. Roblox Studio를 실행합니다.
-2. **파일 → 파일 열기(Ctrl+O)**에서 저장소의 `build/FILAMENT-Fishing-0.1.rbxlx`를 내려받아 엽니다. 별도로 받은 원본 `.rbxl` 게임 파일도 그대로 열 수 있습니다.
+2. **파일 → 파일 열기(Ctrl+O)**에서 저장소의 `build/FILAMENT-Fishing-0.1.1.rbxlx`를 내려받아 엽니다. 같은 폴더의 `FILAMENT-Fishing-0.1.1.rbxl`도 바로 열 수 있습니다.
 3. **Play(F5)**를 누릅니다. `Run`은 플레이어 캐릭터를 만들지 않으므로 사용하지 마세요.
-4. 화면 위 **낚시터** 버튼을 누릅니다. 낚싯대는 자동으로 장착됩니다. 해제했다면 위의 **낚싯대 장착**, 키보드 **R** 또는 기본 단축바를 사용하세요.
+4. 스폰 앞 연못의 **목재 부두로 걸어가세요**. 낚싯대는 자동 장착됩니다. 해제했다면 **R** 또는 기본 단축바의 **Rod**를 누릅니다.
 5. **F키 또는 화면의 캐스팅 버튼을 누르다가 놓으세요.** 입질 뒤 다시 유지하고, 저항 구간에서는 놓았다가 **4초 안에 9번 연타**하세요. 저항을 제거한 뒤 다시 유지하면 잡힙니다.
 
 **Rojo 플러그인, 개발 도구, 외부 모델 설치, 수동 오브젝트 배치가 필요하지 않습니다.** 지형·연못·부두·상점·공방·수족관은 게임 파일에 포함되어 있고, 낚싯대·물고기·알·펫·UI는 실행 시 생성됩니다.
 
-기본 파일은 **Studio 임시 저장 모드**입니다. 게시하지 않은 파일도 바로 실행할 수 있고, 상단에 `임시 저장 · Stop 시 초기화`가 표시됩니다. **Stop하면 저장 데이터는 사라집니다.** 이것은 클라우드 저장 성공 표시가 아닙니다. 실제 저장·재접속 검증은 아래 절차를 따르세요.
+기본 파일은 **Studio 임시 저장 모드**입니다. 게시하지 않은 파일도 바로 실행할 수 있고, 첫 안내에 `임시 저장 · Stop 시 초기화`가 표시되고, 지갑의 주황색 점과 **가방 → ? 도움말**에서 현재 저장 모드를 확인할 수 있습니다. **Stop하면 저장 데이터는 사라집니다.** 이것은 클라우드 저장 성공 표시가 아닙니다. 실제 저장·재접속 검증은 아래 절차를 따르세요.
 
 ## 핵심 플레이 흐름
 
@@ -22,7 +22,9 @@ Roblox용 낚시·수집·개인 수족관·희귀 펫 프로토타입입니다.
 | 물결 알 | 가방의 알 탭에서 사료 선택 → 내 수족관으로 이동 → 알 배치 → 부화 |
 | 아기 수달 / 구름 여우 / 별빛 드래곤 | 가방의 펫 탭에서 한 마리 장착 → 실제 입질 대기시간 감소·포획 속도 증가 |
 
-상단 이동 버튼은 빠른 테스트를 위한 무료 이동입니다. 좁은 화면에서는 가로로 밀어 나머지 버튼을 볼 수 있습니다. **B키**로 가방을 열거나 닫을 수 있습니다. 상점·공방·본인 수족관의 콘솔에도 상호작용 프롬프트가 있습니다.
+**B키** 또는 상단 가방 아이콘으로 가방을 열고 닫습니다. 연못을 바라볼 때 왼쪽은 청록 지붕 **물고기 상점**, 오른쪽은 주황 지붕 **사료 공방**입니다. 카운터에 접근해 **E / 터치 프롬프트**로 엽니다. 스폰 뒤 아치 너머는 수족관 정원입니다. **내 수족관** 표식이 있는 주황 콘솔로 접근하세요. 다른 사람의 수족관도 볼 수 있지만 조작 권한은 소유자만 가집니다.
+
+평소에는 상단 타이틀·코인·가방과 작은 낚시 힌트만 보입니다. 포획 중에는 하단 게이지, 종료 시에는 작은 결과 카드가 나타납니다. 가방은 넓은 화면에서 카드·상세를 나란히, 세로 화면에서 목록 → 상세 → 뒤로 순서로 표시합니다. 이동 버튼은 일반 HUD에서 제거했고 **Studio 전용 접이식 테스트 메뉴**로 옮겼습니다.
 
 가방에서 물고기를 선택한 뒤 원하는 장소로 이동하고 다시 가방을 열어 사용하세요. 상점·공방·수족관 작업은 **서버가 해당 장소까지의 거리를 확인**합니다. 수족관의 물고기는 먼저 회수해야 판매·제작할 수 있습니다.
 
@@ -57,7 +59,7 @@ Roblox용 낚시·수집·개인 수족관·희귀 펫 프로토타입입니다.
 
 ## Studio 디버그 도구
 
-Play 중 **가방 → 도움말 → Studio 전용 테스트**를 사용하세요.
+Play 중 **가방 → ? 도움말 → Studio 전용 테스트**를 펼쳐 사용하세요. 낚시터·내 수족관·상점·공방 이동 버튼도 여기에 있습니다.
 
 - **물고기 3종 + 알 + 재료 지급**: 물고기 각 1마리, 물결 알 1개, 500코인, 사료 각 3개를 지급합니다.
 - **배치된 알 즉시 부화**: 이미 배치한 알의 시간을 앞으로 당깁니다. 예정 부화 기간의 길이는 유지하여 확률 수치를 바꾸지 않습니다.
@@ -69,9 +71,9 @@ Play 중 **가방 → 도움말 → Studio 전용 테스트**를 사용하세요
 1. 이 파일을 **새로운 비공개 테스트 Experience**로 저장합니다. 공개 액세스로 전환하지 마세요. 기존 다른 게임을 덮어쓰지 마세요.
 2. Studio에서 Explorer의 `ReplicatedStorage → Shared → Config`를 열고 `StudioPersistence = true`로 바꿉니다. 파일을 저장합니다.
 3. 해당 테스트 Experience 설정의 보안 항목에서 **Enable Studio Access to API Services**를 켭니다.
-4. Play 후 상단이 **클라우드 저장 완료**인지 확인합니다. 오류가 나면 Output의 `[FILAMENT]` 메시지를 확인하세요. 영속 모드는 오류를 임시 저장 모드로 몰래 바꾸지 않습니다.
+4. Play 후 **가방 → ? 도움말 → 저장 상태**가 **클라우드 저장 완료**인지 확인합니다. 오류가 나면 Output의 `[FILAMENT]` 메시지를 확인하세요. 영속 모드는 오류를 임시 저장 모드로 몰래 바꾸지 않습니다.
 5. 테스트 팩을 지급하고 물고기를 배치·판매·제작합니다. 알을 사료 없이 배치하고 완료까지 남은 시간을 확인합니다.
-6. **클라우드 저장 완료** 표시 후 Stop합니다. 60초 이상 기다렸다가 같은 계정·같은 Experience에서 다시 Play합니다.
+6. 도움말의 **클라우드 저장 완료** 상태를 확인하고 Stop합니다. 60초 이상 기다렸다가 같은 계정·같은 Experience에서 다시 Play합니다.
 7. 코인·사료·수족관 배치·레벨이 유지되고, 알은 펫 1마리로 바뀌어야 합니다. 다시 Stop/Play해도 같은 펫이며 추가 지급되지 않아야 합니다.
 
 네임스페이스는 `FILAMENT_Fishing_v1_Studio`와 `FILAMENT_Fishing_v1_Live`로 분리됩니다. Studio 테스트 데이터는 게시된 Roblox 서버의 데이터와 공유되지 않습니다. 라이브 서버는 항상 영속 저장을 사용합니다. 실제 API 저장 실패·잠금 충돌은 최대 3회 재시도 또는 접속 거부·세션 중지로 명시적으로 처리합니다.
@@ -86,7 +88,9 @@ src/shared/Catalog.lua         물고기·알·펫 정의
 src/shared/Domain.lua          보상·소비·배치·부화·버프 순수 규칙
 src/shared/FishingMachine.lua  낚시 V1 상태 전환
 src/shared/Strings.lua         한국어·영어 UI 문구
-src/shared/Models.lua          기본 Part 모델
+src/shared/Models.lua          자체 제작 물고기·알·펫 모델
+src/shared/VisualConfig.lua    UI 색상·모델·카메라 표시 설정
+src/shared/Presentation.lua    순수 UI 상태·행동 노출 규칙
 src/shared/Layout.lua          반응형 크기 계산
 src/server/Main.server.lua     서버 초기화·검증·Remote 연결
 src/server/FishingService.lua  낚시 위치·장비·입력·보상 연결
@@ -94,9 +98,12 @@ src/server/ProfileStore.lua    영속 트랜잭션·재시도·세션 관리
 src/server/Lease.lua           UpdateAsync 잠금 규칙
 src/server/WorldService.lua    수족관 할당·표시·낚싯대
 src/client/Main.client.lua     UI·PC/터치 입력
-src/client/Effects.client.lua  수영·펫 추종 표시
+src/client/Effects.client.lua  수영·펫 추종·찌·부화 효과
+src/client/Widgets.lua         공통 UI·3D 미리보기
+src/client/ArrivalCamera.client.lua 스폰 시 연못 방향 카메라
 src/world.model.json           빌드에 포함되는 전체 맵
-tests/spec.luau                실제 Luau 모듈 자동 테스트
+tests/spec.luau                기존 30개 규칙·저장·레이아웃 테스트
+tests/presentation.spec.luau   14개 UI 상태·배치·입력 회귀 테스트
 scripts/                      빌드·검사·맵 생성
 docs/                         검증표·실제 테스트 절차·설계
 ```
@@ -107,16 +114,19 @@ docs/                         검증표·실제 테스트 절차·설계
 - Windows 재빌드: PowerShell에서 `./scripts/build.ps1` 실행.
 - macOS/Linux 재빌드: `bash scripts/build.sh` 실행.
 - Luau 검사: `luau-analyze src/shared/*.lua src/server/*.lua src/client/*.lua`
-- 규칙·저장 테스트: `python scripts/run_tests.py` (필요하면 `LUAU_BIN`에 실행 파일 경로 지정).
+- 전체 검사: `bash scripts/check.sh` (빌드 후 실행). Windows에서는 `python scripts/run_tests.py`, `luau tests/presentation.spec.luau`, `python scripts/validate_place.py`를 순서대로 실행합니다.
+- 규칙·저장 테스트만 실행: `python scripts/run_tests.py` (필요하면 `LUAU_BIN`에 실행 파일 경로 지정).
 - 개발 중 Studio 동기화: `rojo serve`와 Rojo Studio 플러그인 사용.
 - 맵 생성기를 다시 실행하면 `src/world.model.json`을 재생성합니다. 지속적인 맵 변경은 생성기에 반영하세요.
 - `rojo build`는 스크립트를 실행하는 것이 아닙니다. 빌드 통과만으로 실제 플레이 성공을 확정할 수 없습니다.
 
-소스와 Roblox Studio에서 열 수 있는 `.rbxlx` 빌드는 [GitHub `darkkyoung/Roblox_Fishing`](https://github.com/darkkyoung/Roblox_Fishing) `main`에 등록했습니다. 아스트라가 생성한 로컬 Git SHA `6a38215e947f2ae2f1944bb079d5d67b1c13fd2c`는 원본 출처 기록이며, GitHub 이관 과정에서 **새로운 커밋 SHA**가 생성되었습니다. 원본 ZIP에 있는 `SOURCE_COMMIT.txt`와 `build/FILAMENT-source.bundle`은 별도 산출물이며 소스 트리에는 포함되지 않습니다. 바이너리 `.rbxl`은 원본 배포 파일에서 받을 수 있고, GitHub에 포함된 `.rbxlx`는 Roblox Studio에서 바로 열 수 있습니다. 다른 프로젝트는 변경하지 않았습니다.
+이번 작업 기준은 fresh fetch한 `origin/main`의 `857fa5c95357908fa022e6f61417b6e773432765`입니다. 작업 브랜치는 `feature/fishing-poc-011-visual-refresh`이며 main에 직접 커밋하거나 병합하지 않습니다. 기존 `build/FILAMENT-Fishing-0.1.rbxlx`도 원본 그대로 보존합니다. 최종 GitHub 커밋과 PR은 전달용 ZIP의 `DELIVERY.md`에 기록합니다.
 
 ## 검증과 다음 단계
 
-자세한 완료 구분은 [docs/TEST_RESULTS.md](docs/TEST_RESULTS.md), 실제 Studio 승인 절차는 [docs/STUDIO_TEST_PLAN.md](docs/STUDIO_TEST_PLAN.md), 구조·한계·향후 개발은 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)를 참조하세요.
+**0.1.1:** [변경·회귀 결과 보고서](docs/PHASE_0.1.1_REPORT.md), [실제 Studio QA 체크리스트](docs/QA_0.1.1.md), [검사 원문](build/test-output-0.1.1.txt)을 참조하세요. 자동 테스트 **30 + 14개 통과**, Luau 검사·컴파일·두 형식 Rojo 빌드 통과입니다. **Studio 렌더링, 실제 조작, 실기기, 클라우드 저장, 실제 2인 서버 검증은 미실행**입니다.
+
+기존 [0.1 테스트 결과](docs/TEST_RESULTS.md), [0.1 Studio 절차](docs/STUDIO_TEST_PLAN.md), [핵심 시스템 설계](docs/ARCHITECTURE.md)는 이전 버전 기록으로 보존합니다. 새 UI 조작법은 이 README와 0.1.1 QA 문서가 기준입니다.
 
 현재 공개 배포·Robux 결제·플레이어 거래·도둑질·물고기 진화·낚시 V2는 포함하지 않습니다. 실제 Studio 체크리스트를 통과한 뒤 다음 단계로 넘어가세요.
 

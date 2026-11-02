@@ -4,6 +4,7 @@ local TweenService = game:GetService("TweenService")
 local Shared = game:GetService("ReplicatedStorage").Shared
 local Config = require(Shared.Config)
 local Util = require(Shared.Util)
+local Visual = require(Shared.VisualConfig)
 local Machine = require(Shared.FishingMachine).new(Config.Fishing)
 local Service = {}
 Service.__index = Service
@@ -23,7 +24,7 @@ function Service:valid(player)
     local char = player.Character
     local root = char and char:FindFirstChild("HumanoidRootPart")
     local human = char and char:FindFirstChildOfClass("Humanoid")
-    if not root or not human or human.Health <= 0 or not char:FindFirstChild("FilamentRod") then return false end
+    if not root or not human or human.Health <= 0 or not char:FindFirstChild(Visual.RodName) then return false end
     local f = Config.Fishing
     return math.abs(root.Position.X-f.DockX) <= f.DockHalfX and math.abs(root.Position.Z-f.DockZ) <= f.DockHalfZ and root.Position.Y > 1 and root.Position.Y < 12
 end
@@ -61,26 +62,34 @@ function Service:cast(player,s)
     local bobber = Instance.new("Part")
     bobber.Name = "Bobber_"..player.UserId
     bobber.Shape = Enum.PartType.Ball
-    bobber.Size = Vector3.new(.65,.65,.65)
+    bobber.Size = Vector3.new(.72,.72,.72)
+    bobber:SetAttribute("FilamentBobber",true)
+    bobber:SetAttribute("FishingPhase","Flight")
     bobber.Anchored = true
     bobber.CanCollide = false
-    bobber.Color = Color3.fromRGB(255,140,74)
+    bobber.Color = Color3.fromRGB(240,148,67)
+    bobber.Material = Enum.Material.SmoothPlastic
     bobber.Position = root.Position+Vector3.new(0,3,0)
     local attach = Instance.new("Attachment")
     attach.Parent = bobber
     bobber.Parent = workspace
-    local tip = player.Character.FilamentRod.Handle.Tip
+    local tip = player.Character:FindFirstChild(Visual.RodName).Handle.Tip
     local beam = Instance.new("Beam")
     beam.Attachment0 = tip
     beam.Attachment1 = attach
-    beam.Width0 = .035
-    beam.Width1 = .025
+    beam.Width0 = .055
+    beam.Width1 = .04
     beam.FaceCamera = true
     beam.Color = ColorSequence.new(Color3.fromRGB(235,238,222))
     beam.Parent = bobber
     s.bobber = bobber
     s.beam = beam
-    TweenService:Create(bobber,TweenInfo.new(Config.Fishing.FlightSeconds,Enum.EasingStyle.Quad),{Position=target}):Play()
+    local start=bobber.Position
+    local middle=(start+target)*.5+Vector3.new(0,5,0)
+    TweenService:Create(bobber,TweenInfo.new(Config.Fishing.FlightSeconds*.5,Enum.EasingStyle.Linear),{Position=middle}):Play()
+    task.delay(Config.Fishing.FlightSeconds*.5,function()
+        if bobber.Parent then TweenService:Create(bobber,TweenInfo.new(Config.Fishing.FlightSeconds*.5,Enum.EasingStyle.Quad,Enum.EasingDirection.In),{Position=target}):Play() end
+    end)
 end
 function Service:tick(dt)
     local now = os.clock()
@@ -88,6 +97,7 @@ function Service:tick(dt)
         if not self:valid(player) then self:cancel(player,false)
         else
             Machine.step(s,now,dt)
+            if s.bobber then s.bobber:SetAttribute("FishingPhase",s.phase) end
             if s.phase == "Success" then
                 self:cancel(player,true) -- Consume session before yielding to a save.
                 self.remote:FireClient(player,{phase="Saving"})

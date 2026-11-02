@@ -2,344 +2,435 @@ local Players=game:GetService("Players")
 local ReplicatedStorage=game:GetService("ReplicatedStorage")
 local UserInputService=game:GetService("UserInputService")
 local RunService=game:GetService("RunService")
+local GuiService=game:GetService("GuiService")
+local TweenService=game:GetService("TweenService")
 local player=Players.LocalPlayer
 local Shared=ReplicatedStorage:WaitForChild("Shared")
 local Config=require(Shared.Config)
+local Visual=require(Shared.VisualConfig)
 local Catalog=require(Shared.Catalog)
 local Strings=require(Shared.Strings)
 local Layout=require(Shared.Layout)
+local Presentation=require(Shared.Presentation)
 local Domain=require(Shared.Domain).new(Config,Catalog,require(Shared.Util))
+local W=require(script.Parent.Widgets)
+local C=W.colors
 local remotes=ReplicatedStorage:WaitForChild("Remotes")
 local Action=remotes:WaitForChild("Action")
 local FishingInput=remotes:WaitForChild("FishingInput")
-local palette={bg=Color3.fromRGB(17,39,48),card=Color3.fromRGB(29,58,67),line=Color3.fromRGB(65,104,111),text=Color3.fromRGB(244,239,219),muted=Color3.fromRGB(170,199,199),accent=Color3.fromRGB(255,174,89),mint=Color3.fromRGB(111,218,191),red=Color3.fromRGB(255,126,116)}
+local world=workspace:WaitForChild("World")
 local locale=string.sub(player.LocaleId,1,2)=="ko" and "ko" or "en"
-local data=nil
-local snapshotAt=0
-local selectedTab="fish"
-local feedQuality="none"
-local fishState={phase="Idle",progress=0,power=0,taps=0,remaining=0}
-local held=false
-local castPressed=false
-local pointer=nil
-local actionPendingUntil=0
+local data,snapshotAt=nil,0
+local phase={phase="Idle",progress=0}
+local context,tab,selectedId="bag","fish",nil
+local feedQuality,page,debugOpen="none",1,false
+local held,castPressed,pointer=false,false,nil
+local pendingUntil=0
 local timers={}
-local function t(key) return Strings[locale][key] or Strings.en[key] or tostring(key) end
-local function new(class,parent,props)
-    local obj=Instance.new(class)
-    for k,v in pairs(props or {}) do obj[k]=v end
-    obj.Parent=parent
-    return obj
-end
-local function corner(obj,radius) new("UICorner",obj,{CornerRadius=UDim.new(0,radius or 10)}) end
-local function label(parent,text,pos,size,textSize,color)
-    return new("TextLabel",parent,{Text=text,Position=pos,Size=size,BackgroundTransparency=1,Font=Enum.Font.Gotham,TextSize=textSize or 14,TextColor3=color or palette.text,TextXAlignment=Enum.TextXAlignment.Left,TextWrapped=true})
-end
-local function button(parent,text,pos,size,callback,color)
-    local b=new("TextButton",parent,{Text=text,Position=pos,Size=size,BackgroundColor3=color or palette.line,TextColor3=palette.text,Font=Enum.Font.GothamBold,TextSize=13,TextWrapped=true,AutoButtonColor=true})
-    corner(b,8)
-    if callback then b.Activated:Connect(callback) end
-    return b
-end
-local gui=new("ScreenGui",player:WaitForChild("PlayerGui"),{Name="FilamentUI",ResetOnSpawn=false,IgnoreGuiInset=false,ZIndexBehavior=Enum.ZIndexBehavior.Sibling,DisplayOrder=10})
-local hud=new("Frame",gui,{Position=UDim2.fromOffset(12,6),Size=UDim2.new(1,-24,0,48),BackgroundColor3=palette.bg})
-corner(hud)
-local title=label(hud,t("title"),UDim2.fromOffset(12,3),UDim2.new(.6,-12,0,21),13)
-title.Font=Enum.Font.GothamBold
-local money=label(hud,"—",UDim2.new(.6,0,0,3),UDim2.new(.4,-12,0,21),15,palette.accent)
-money.TextXAlignment=Enum.TextXAlignment.Right
-local saveLabel=label(hud,t("loading"),UDim2.fromOffset(12,26),UDim2.new(1,-24,0,16),11,palette.muted)
-local nav=new("ScrollingFrame",gui,{Position=UDim2.fromOffset(12,60),Size=UDim2.new(1,-24,0,36),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=0,ScrollingDirection=Enum.ScrollingDirection.X,AutomaticCanvasSize=Enum.AutomaticSize.X,CanvasSize=UDim2.new()})
-new("UIListLayout",nav,{FillDirection=Enum.FillDirection.Horizontal,Padding=UDim.new(0,6),SortOrder=Enum.SortOrder.LayoutOrder})
-local fishing=new("Frame",gui,{AnchorPoint=Vector2.new(.5,0),Position=UDim2.new(.5,0,0,108),Size=UDim2.fromOffset(430,194),BackgroundColor3=palette.bg,BackgroundTransparency=.06})
-corner(fishing,14)
-local fishTitle=label(fishing,t("idle"),UDim2.fromOffset(14,8),UDim2.new(1,-65,0,28),16)
-fishTitle.Font=Enum.Font.GothamBold
-local cancelButton=button(fishing,"×",UDim2.new(1,-44,0,7),UDim2.fromOffset(32,30),function() FishingInput:FireServer("cancel");held=false;castPressed=false end)
-local gaugeText=label(fishing,t("power"),UDim2.fromOffset(14,43),UDim2.new(1,-28,0,20),12,palette.muted)
-local track=new("Frame",fishing,{Position=UDim2.fromOffset(14,68),Size=UDim2.new(1,-28,0,14),BackgroundColor3=palette.line,BorderSizePixel=0})
-corner(track,7)
-local fill=new("Frame",track,{Size=UDim2.fromScale(0,1),BackgroundColor3=palette.mint,BorderSizePixel=0})
-corner(fill,7)
-local resistanceMark=new("Frame",track,{Position=UDim2.fromScale(Config.Fishing.ResistanceAt,0),Size=UDim2.new(0,3,1,0),BackgroundColor3=palette.accent,BorderSizePixel=0})
-local resistanceText=label(fishing,"",UDim2.fromOffset(14,85),UDim2.new(1,-28,0,20),12,palette.accent)
-local actionButton=button(fishing,t("castButton"),UDim2.fromOffset(14,112),UDim2.new(1,-28,0,48),nil,palette.accent)
-actionButton.TextColor3=palette.bg
-local keyHint=label(fishing,t("keyHint"),UDim2.fromOffset(14,166),UDim2.new(1,-28,0,18),11,palette.muted)
-keyHint.TextXAlignment=Enum.TextXAlignment.Center
-local toast=label(gui,"",UDim2.new(.5,0,0,310),UDim2.new(1,-30,0,44),14,palette.text)
-toast.AnchorPoint=Vector2.new(.5,0);toast.BackgroundColor3=palette.bg;toast.BackgroundTransparency=.08;toast.TextXAlignment=Enum.TextXAlignment.Center;toast.Visible=false;toast.ZIndex=30;corner(toast)
-local toastSequence=0
-local function notify(key)
-    toastSequence+=1
-    local sequence=toastSequence
-    toast.Text=t(key);toast.Visible=true
-    task.delay(3.5,function() if toastSequence==sequence then toast.Visible=false end end)
-end
-local overlay=new("Frame",gui,{Size=UDim2.fromScale(1,1),BackgroundColor3=Color3.new(0,0,0),BackgroundTransparency=.35,Visible=false,ZIndex=20,Active=true})
-local panel=new("Frame",overlay,{AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromOffset(760,560),BackgroundColor3=palette.bg})
-corner(panel,14)
-local panelTitle=label(panel,t("inventory"),UDim2.fromOffset(16,8),UDim2.new(1,-130,0,30),21)
-panelTitle.Font=Enum.Font.GothamBold
-local close=button(panel,t("close"),UDim2.new(1,-90,0,8),UDim2.fromOffset(74,32),function() overlay.Visible=false end)
-local tabs=new("ScrollingFrame",panel,{Position=UDim2.fromOffset(12,48),Size=UDim2.new(1,-24,0,38),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=2,ScrollingDirection=Enum.ScrollingDirection.X,AutomaticCanvasSize=Enum.AutomaticSize.X,CanvasSize=UDim2.new()})
-new("UIListLayout",tabs,{FillDirection=Enum.FillDirection.Horizontal,Padding=UDim.new(0,6),SortOrder=Enum.SortOrder.LayoutOrder})
-local content=new("ScrollingFrame",panel,{Position=UDim2.fromOffset(12,94),Size=UDim2.new(1,-24,1,-108),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=4,AutomaticCanvasSize=Enum.AutomaticSize.Y,CanvasSize=UDim2.new(),ScrollingDirection=Enum.ScrollingDirection.Y})
-local list=new("UIListLayout",content,{Padding=UDim.new(0,10),SortOrder=Enum.SortOrder.LayoutOrder})
-local navButtons={}
+local detailModel=nil
+local portraitDetail=false
+local coreMenu=false
+local touch=UserInputService.TouchEnabled
+local resultDeadline=0
+local t=function(key) return Strings[locale][key] or Strings.en[key] or tostring(key) end
+local function serverNow() return data and data.serverTime+os.clock()-snapshotAt or os.time() end
+local gui=W.new("ScreenGui",player:WaitForChild("PlayerGui"),{Name="FilamentUI",ResetOnSpawn=false,ScreenInsets=Enum.ScreenInsets.CoreUISafeInsets,ClipToDeviceSafeArea=true,ZIndexBehavior=Enum.ZIndexBehavior.Sibling,DisplayOrder=10})
+local topGui=W.new("ScreenGui",player.PlayerGui,{Name="FilamentTopbar",ResetOnSpawn=false,ScreenInsets=Enum.ScreenInsets.TopbarSafeInsets,ClipToDeviceSafeArea=true,ZIndexBehavior=Enum.ZIndexBehavior.Sibling,DisplayOrder=10})
+local top=W.frame(topGui,{AnchorPoint=Vector2.new(0,.5),Position=UDim2.fromScale(0,.5),Size=UDim2.new(1,0,0,44),BackgroundTransparency=1})
+local brand=W.label(top,"FILAMENT",UDim2.fromOffset(12,0),UDim2.fromOffset(120,44),16,C.dark,true)
+local petLabel=W.label(top,"",UDim2.fromOffset(145,0),UDim2.new(1,-340,0,44),12,C.muted)
+local wallet=W.frame(top,{AnchorPoint=Vector2.new(1,0),Position=UDim2.new(1,-62,0,1),Size=UDim2.fromOffset(116,42),BackgroundColor3=C.panel})
+W.round(wallet,14);W.stroke(wallet)
+W.icon(wallet,"coin",UDim2.fromOffset(9,10),22,C.accent)
+local coins=W.label(wallet,"—",UDim2.fromOffset(37,0),UDim2.new(1,-44,1,0),14,C.ink,true)
+local bag=W.button(top,"",UDim2.new(1,-52,0,0),UDim2.fromOffset(48,44),nil,true)
+W.icon(bag,"bag",UDim2.fromOffset(11,8),27,C.ink)
+local saveDot=W.frame(wallet,{Position=UDim2.new(1,-9,0,4),Size=UDim2.fromOffset(5,5),BackgroundColor3=C.accent});W.round(saveDot,5)
+local modal=W.frame(gui,{Name="BagOverlay",Size=UDim2.fromScale(1,1),BackgroundColor3=C.dark,BackgroundTransparency=.42,Visible=false,Active=true,ZIndex=20})
+local panel=W.frame(modal,{AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5)});W.round(panel,20);W.stroke(panel)
+local panelTitle=W.label(panel,"",UDim2.fromOffset(18,9),UDim2.new(1,-128,0,30),22,C.ink,true)
+local locationLabel=W.label(panel,"",UDim2.fromOffset(18,39),UDim2.new(1,-38,0,20),12,C.muted)
+local close=W.button(panel,"×",UDim2.new(1,-56,0,10),UDim2.fromOffset(44,44))
+local help=W.button(panel,"?",UDim2.new(1,-106,0,10),UDim2.fromOffset(44,44))
+local tabs=W.frame(panel,{Position=UDim2.fromOffset(12,66),Size=UDim2.new(1,-24,0,44),BackgroundTransparency=1})
 local tabButtons={}
-local render
-local function send(action,id,option)
-    if os.clock()<actionPendingUntil then return end
-    actionPendingUntil=os.clock()+.55
-    Action:FireServer(action,id,option)
+local gridPane=W.frame(panel,{Position=UDim2.fromOffset(12,122),BackgroundTransparency=1})
+local grid=W.scroll(gridPane,{Size=UDim2.fromScale(1,1)})
+local gridLayout=W.new("UIGridLayout",grid,{CellPadding=UDim2.fromOffset(10,10),SortOrder=Enum.SortOrder.LayoutOrder})
+local detail=W.scroll(panel,{Position=UDim2.fromOffset(0,122)})
+local detailStack=W.stack(detail,10)
+local fullPage=W.scroll(panel,{Position=UDim2.fromOffset(16,122),Size=UDim2.new(1,-32,1,-138),Visible=false})
+local fullStack=W.stack(fullPage,12)
+local footer=W.frame(panel,{Position=UDim2.new(0,12,1,-52),Size=UDim2.fromOffset(400,44),BackgroundTransparency=1})
+local prev=W.button(footer,"‹",UDim2.new(),UDim2.fromOffset(44,44))
+local nextPage=W.button(footer,"›",UDim2.new(1,-44,0,0),UDim2.fromOffset(44,44))
+local pageLabel=W.label(footer,"",UDim2.fromOffset(52,0),UDim2.new(1,-104,1,0),12,C.muted)
+pageLabel.TextXAlignment=Enum.TextXAlignment.Center
+local back=W.button(panel,"",UDim2.fromOffset(12,66),UDim2.fromOffset(140,44));back.Visible=false
+local gauge=W.frame(gui,{Name="FishingGauge",AnchorPoint=Vector2.new(.5,0),BackgroundColor3=C.panel,Visible=false});W.round(gauge,16);W.stroke(gauge)
+local gaugeTitle=W.label(gauge,"",UDim2.fromOffset(14,8),UDim2.new(1,-60,0,24),15,C.ink,true)
+local gaugeNumber=W.label(gauge,"",UDim2.new(1,-76,0,8),UDim2.fromOffset(62,24),14,C.water,true);gaugeNumber.TextXAlignment=Enum.TextXAlignment.Right
+local track=W.frame(gauge,{Position=UDim2.fromOffset(14,38),Size=UDim2.new(1,-28,0,10),BackgroundColor3=C.line});W.round(track,5)
+local fill=W.frame(track,{Size=UDim2.fromScale(0,1),BackgroundColor3=C.water});W.round(fill,5)
+local marker=W.frame(track,{Position=UDim2.fromScale(Config.Fishing.ResistanceAt,0),Size=UDim2.new(0,2,1,0),BackgroundColor3=C.accent})
+local gaugeNote=W.label(gauge,"",UDim2.fromOffset(14,52),UDim2.new(1,-28,0,23),12,C.muted)
+local hint=W.button(gui,"",UDim2.new(),UDim2.fromOffset(290,32));hint.BackgroundTransparency=.12;hint.TextSize=12;hint.Visible=false
+local actionButton=W.button(gui,"",UDim2.new(),UDim2.fromOffset(64,64),nil,true);W.round(actionButton,32);actionButton.Visible=false
+local waiting=W.label(gui,"",UDim2.new(),UDim2.fromOffset(280,28),13,C.ink,true);waiting.BackgroundColor3=C.panel;waiting.BackgroundTransparency=.1;waiting.TextXAlignment=Enum.TextXAlignment.Center;waiting.Visible=false;W.round(waiting,14)
+local cancel=W.button(gui,"×",UDim2.new(),UDim2.fromOffset(44,44));cancel.Visible=false
+local toast=W.frame(gui,{AnchorPoint=Vector2.new(.5,0),Position=UDim2.new(.5,0,0,12),Size=UDim2.fromOffset(350,54),BackgroundColor3=C.dark,Visible=false,ZIndex=30});W.round(toast,16)
+local toastText=W.label(toast,"",UDim2.fromOffset(14,5),UDim2.new(1,-28,1,-10),13,C.panel);toastText.TextXAlignment=Enum.TextXAlignment.Center
+local result=W.frame(gui,{AnchorPoint=Vector2.new(.5,0),Size=UDim2.fromOffset(300,94),Visible=false});W.round(result,18);W.stroke(result)
+local metrics=Layout.metrics(800,600,touch)
+local render,renderDetail,resize,updateFishing
+local notifySequence=0
+local function notify(key)
+    notifySequence+=1
+    local sequence=notifySequence
+    toastText.Text=t(key);toast.Visible=not coreMenu
+    task.delay(Visual.UI.ToastSeconds,function() if sequence==notifySequence then toast.Visible=false end end)
 end
 local function release()
     held=false;pointer=nil
     if castPressed then FishingInput:FireServer("release");castPressed=false end
     FishingInput:FireServer("stopHold")
 end
-local function open(tab)
+local function finishInput()
     release()
-    if fishState.phase~="Idle" then FishingInput:FireServer("cancel") end
-    selectedTab=tab or selectedTab
-    overlay.Visible=true
-    render()
+    if phase.phase~="Idle" and phase.phase~="Success" and phase.phase~="Failed" then FishingInput:FireServer("cancel") end
 end
-local function travel(destination)
-    release();overlay.Visible=false
-    Action:FireServer("travel",destination)
+local function send(action,id,option)
+    if os.clock()<pendingUntil then return end
+    pendingUntil=os.clock()+.55
+    Action:FireServer(action,id,option)
 end
-local function row(height)
-    local f=new("Frame",content,{Size=UDim2.new(1,-6,0,height),BackgroundColor3=palette.card,BorderSizePixel=0})
-    corner(f,10);return f
+local function clear(frame,keep)
+    for _,child in ipairs(frame:GetChildren()) do if child~=keep then child:Destroy() end end
 end
-local function itemCard(item)
-    local def=Catalog[item.species]
-    local egg=item.kind=="egg"
-    local inTank=item.location=="aquarium"
-    local f=row(egg and 142 or (item.kind=="fish" and 148 or 126))
-    local dot=new("Frame",f,{Position=UDim2.fromOffset(12,14),Size=UDim2.fromOffset(12,12),BackgroundColor3=Color3.fromRGB(def.color[1],def.color[2],def.color[3]),BorderSizePixel=0})
-    corner(dot,6)
-    label(f,t(def.nameKey).." · "..t(def.rarity),UDim2.fromOffset(32,7),UDim2.new(1,-42,0,27),15)
-    label(f,(inTank and t("inTank") or t("bag")).." · #"..string.sub(item.id,1,7),UDim2.fromOffset(12,36),UDim2.new(1,-24,0,18),11,palette.muted)
-    local function action(text,index,count,callback,y)
-        return button(f,text,UDim2.new((index-1)/count,8,0,y or 96),UDim2.new(1/count,-16,0,40),callback)
-    end
-    if item.kind=="fish" then
-        label(f,t("price").." "..def.value.." · "..t("basic").." ×"..def.basicYield.." · "..t("premium").." ×"..def.premiumYield,UDim2.fromOffset(12,59),UDim2.new(1,-24,0,28),12)
-        if inTank then action(t("retrieve"),1,1,function() send("retrieve",item.id) end)
-        else
-            action(t("place"),1,4,function() send("place",item.id) end)
-            action(t("sell"),2,4,function() send("sell",item.id) end)
-            action(t("craftBasic"),3,4,function() send("craft",item.id,"basic") end)
-            action(t("craftPremium"),4,4,function() send("craft",item.id,"premium") end)
-        end
-    elseif egg then
-        if inTank then
-            local timer=label(f,"",UDim2.fromOffset(12,60),UDim2.new(1,-24,0,24),15,palette.accent)
-            table.insert(timers,{label=timer,readyAt=item.readyAt})
-            label(f,t(item.feedQuality).." · Lv."..item.incubationLevel.."\n"..t("lockedEgg"),UDim2.fromOffset(12,88),UDim2.new(1,-24,0,44),12,palette.muted)
-        else
-            label(f,t(feedQuality).." · "..Config.Feed[feedQuality].duration..t("seconds"),UDim2.fromOffset(12,61),UDim2.new(1,-24,0,22),13,palette.accent)
-            action(t("place"),1,1,function() send("place",item.id,feedQuality) end,92)
-        end
+local function block(parent,height,color)
+    local f=W.frame(parent,{Size=UDim2.new(1,-4,0,height),BackgroundColor3=color or C.card});W.round(f,12);return f
+end
+local function copyBlock(parent,text,color)
+    local f=block(parent,0)
+    f.AutomaticSize=Enum.AutomaticSize.Y
+    W.new("UIPadding",f,{PaddingTop=UDim.new(0,12),PaddingBottom=UDim.new(0,12),PaddingLeft=UDim.new(0,12),PaddingRight=UDim.new(0,12)})
+    local l=W.label(f,text,UDim2.new(),UDim2.new(1,0,0,0),13,color or C.muted)
+    l.AutomaticSize=Enum.AutomaticSize.Y
+    return f
+end
+local function timeLabel(parent,item)
+    local l=W.label(parent,"",UDim2.fromOffset(10,8),UDim2.new(1,-20,1,-16),14,C.water,true)
+    table.insert(timers,{label=l,readyAt=item.readyAt})
+end
+local function location()
+    local root=player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if not root then return "bag" end
+    local plot=data and world.Aquariums:FindFirstChild(data.plotName or "")
+    return Presentation.context((root.Position-world.Shop.Position).Magnitude,(root.Position-world.Craft.Position).Magnitude,plot and (root.Position-plot.Anchor.Position).Magnitude or math.huge,Config.StationRadius)
+end
+local function closeBag()
+    modal.Visible=false;detailModel=nil;result.Visible=false
+    if updateFishing then updateFishing() end
+end
+local function openBag(which)
+    finishInput();resultDeadline=0;result.Visible=false
+    tab=which or tab;portraitDetail=false;modal.Visible=true
+    context=location();render();updateFishing()
+end
+local function showResult(species,kind)
+    clear(result)
+    W.round(result,18);W.stroke(result)
+    resultDeadline=os.clock()+Visual.UI.ResultSeconds
+    if species then
+        local def=Catalog[species]
+        W.viewport(result,species,UDim2.fromOffset(4,3),UDim2.fromOffset(88,86))
+        W.label(result,t(kind or "caughtLabel"),UDim2.fromOffset(98,10),UDim2.new(1,-110,0,21),11,C.muted)
+        W.label(result,t(species),UDim2.fromOffset(98,32),UDim2.new(1,-110,0,27),17,C.ink,true)
+        W.label(result,t(def.rarity),UDim2.fromOffset(98,64),UDim2.new(1,-110,0,20),12,C[def.rarity],true)
     else
-        label(f,t("bite").." -"..math.floor((1-def.biteMultiplier)*100+.5).."%  ·  "..t("efficiency").." +"..math.floor((def.reelMultiplier-1)*100+.5).."%",UDim2.fromOffset(12,58),UDim2.new(1,-24,0,20),12,palette.mint)
-        local equipped=data.equippedPet==item.id
-        action(equipped and (t("equippedLabel").." · "..t("unequip")) or t("equip"),1,1,function() send(equipped and "unequip" or "equip",item.id) end,82)
+        W.label(result,t("failed"),UDim2.fromOffset(18,12),UDim2.new(1,-36,0,28),17,C.ink,true)
+        W.label(result,t("failedShort"),UDim2.fromOffset(18,43),UDim2.new(1,-36,0,35),13,C.muted)
+    end
+    result.Visible=not modal.Visible and not coreMenu
+end
+renderDetail=function()
+    clear(detail,detailStack);timers={};detailModel=nil
+    if selectedId=="__tank" and data then
+        local lv=data.aquariumLevel
+        copyBlock(detail,t("tankSummary").."\nLv."..lv.." · "..Domain.occupied(data).." / "..Config.Aquarium[lv].capacity)
+        local cost=Config.Aquarium[lv].nextCost
+        copyBlock(detail,cost==0 and t("maxLevel") or (t("upgrade").." · "..cost.." "..t("coins")))
+        if context=="aquarium" and cost>0 then
+            W.button(detail,t("upgrade"),UDim2.new(),UDim2.new(1,-4,0,46),function() send("upgrade") end,true)
+        elseif context~="aquarium" then copyBlock(detail,t("whereTank")) end
+        return
+    end
+    local item=data and data.items[selectedId]
+    if not item then copyBlock(detail,t("selectItem"));return end
+    local def=Catalog[item.species]
+    local showcase=block(detail,metrics.previewHeight+58)
+    local stripe=W.frame(showcase,{Size=UDim2.new(1,0,0,4),BackgroundColor3=C[def.rarity]});W.round(stripe,4)
+    local _,model=W.viewport(showcase,item.species,UDim2.fromOffset(6,6),UDim2.new(1,-12,0,metrics.previewHeight))
+    detailModel=model
+    W.label(showcase,t(item.species),UDim2.fromOffset(14,metrics.previewHeight+4),UDim2.new(1,-28,0,24),18,C.ink,true)
+    W.label(showcase,t(def.rarity).."  ·  "..t(item.location=="aquarium" and "inTank" or "bag"),UDim2.fromOffset(14,metrics.previewHeight+29),UDim2.new(1,-28,0,22),12,C[def.rarity])
+    if item.kind=="fish" then
+        copyBlock(detail,t("price").." "..def.value.."  ·  "..t("basic").." ×"..def.basicYield.."\n"..t("premium").." ×"..def.premiumYield)
+    elseif item.kind=="pet" then
+        copyBlock(detail,t("bite").." −"..math.floor((1-def.biteMultiplier)*100+.5).."%\n"..t("efficiency").." +"..math.floor((def.reelMultiplier-1)*100+.5).."%",C.water)
+    elseif item.location=="aquarium" then
+        timeLabel(block(detail,50),item)
+        copyBlock(detail,t(item.feedQuality).." · Lv."..item.incubationLevel.."\n"..t("lockedEgg"))
+    else
+        copyBlock(detail,t("feedTitle").."\n"..t("basic").." ×"..data.feed.basic.." · "..t("premium").." ×"..data.feed.premium)
+        for _,quality in ipairs({"none","basic","premium"}) do
+            local b=W.button(detail,(quality==feedQuality and "• " or "")..t(quality).." · "..Config.Feed[quality].duration..t("seconds"),UDim2.new(),UDim2.new(1,-4,0,44),function() feedQuality=quality;renderDetail() end,quality==feedQuality)
+            b.LayoutOrder=0
+        end
+        local weights=Domain.weights(data.aquariumLevel,feedQuality,Config.Feed[feedQuality].duration)
+        local sum=0;for _,v in ipairs(weights) do sum+=v.weight end
+        local lines={t("probabilities")}
+        for _,v in ipairs(weights) do table.insert(lines,t(Catalog[v.id].rarity).."  "..string.format("%.2f%%",v.weight/sum*100)) end
+        copyBlock(detail,table.concat(lines,"\n"),C.water)
+        copyBlock(detail,t("snapshotted"))
+    end
+    local actions=Presentation.actions(item,context,data.equippedPet)
+    for _,key in ipairs(actions) do
+        local titleKey=key
+        if key=="unequip" then titleKey="unequip" end
+        W.button(detail,t(titleKey),UDim2.new(),UDim2.new(1,-4,0,46),function()
+            if key=="craftBasic" then send("craft",item.id,"basic")
+            elseif key=="craftPremium" then send("craft",item.id,"premium")
+            else send(key,item.id,item.kind=="egg" and feedQuality or nil) end
+        end,true)
+    end
+    if #actions==0 and item.kind~="pet" and not (item.kind=="egg" and item.location=="aquarium") then
+        copyBlock(detail,t(item.location=="aquarium" and "whereTank" or (item.kind=="egg" and "whereEgg" or "whereFish")))
+    end
+end
+local function renderHelp()
+    clear(fullPage,fullStack)
+    copyBlock(fullPage,t("helpBody"))
+    copyBlock(fullPage,t("rodHelp").."\n"..t("saveInfo")..": "..t(data and data.saveStatus or "loading").."\n"..t("versionLabel"))
+    W.button(fullPage,t("language"),UDim2.new(),UDim2.new(1,-4,0,46),function() locale=locale=="ko" and "en" or "ko";render() end)
+    if data and data.debugEnabled then
+        W.button(fullPage,t("debugToggle"),UDim2.new(),UDim2.new(1,-4,0,46),function() debugOpen=not debugOpen;render() end)
+        if debugOpen then
+            copyBlock(fullPage,t("testNotice"))
+            for _,destination in ipairs({"dock","aquarium","shop","craft"}) do
+                W.button(fullPage,t(destination),UDim2.new(),UDim2.new(1,-4,0,44),function() Action:FireServer("travel",destination);closeBag() end)
+            end
+            W.button(fullPage,t("debugPack"),UDim2.new(),UDim2.new(1,-4,0,46),function() send("debugPack") end,true)
+            W.button(fullPage,t("debugHatch"),UDim2.new(),UDim2.new(1,-4,0,46),function() send("debugHatch") end)
+        end
     end
 end
 render=function()
-    if not overlay.Visible then return end
-    local previousScroll=content.CanvasPosition
-    for _,child in ipairs(content:GetChildren()) do if child~=list then child:Destroy() end end
-    timers={}
-    for key,b in pairs(tabButtons) do b.Text=t(key);b.BackgroundColor3=selectedTab==key and palette.accent or palette.line;b.TextColor3=selectedTab==key and palette.bg or palette.text end
-    panelTitle.Text=t(selectedTab);close.Text=t("close")
-    if not data then local f=row(60);label(f,t("loading"),UDim2.fromOffset(12,5),UDim2.new(1,-24,1,-10));return end
-    if selectedTab=="help" then
-        local f=row(0)
-        f.AutomaticSize=Enum.AutomaticSize.Y
-        new("UIPadding",f,{PaddingTop=UDim.new(0,12),PaddingBottom=UDim.new(0,12),PaddingLeft=UDim.new(0,12),PaddingRight=UDim.new(0,12)})
-        local helpText=label(f,t("helpBody"),UDim2.new(),UDim2.new(1,0,0,0),13)
-        helpText.AutomaticSize=Enum.AutomaticSize.Y
-        helpText.TextYAlignment=Enum.TextYAlignment.Top
-        local languageRow=row(52)
-        button(languageRow,t("language"),UDim2.fromOffset(8,6),UDim2.new(1,-16,0,40),function() locale=locale=="ko" and "en" or "ko";render() end)
-        if data.debugEnabled then
-            local d=row(164)
-            label(d,t("debugTitle"),UDim2.fromOffset(12,5),UDim2.new(1,-24,0,26),16,palette.accent)
-            button(d,t("debugPack"),UDim2.fromOffset(10,40),UDim2.new(1,-20,0,40),function() send("debugPack") end)
-            button(d,t("debugHatch"),UDim2.fromOffset(10,86),UDim2.new(1,-20,0,40),function() send("debugHatch") end)
-            label(d,t("testNotice"),UDim2.fromOffset(12,130),UDim2.new(1,-24,0,26),11,palette.muted)
-        end
-        return
-    end
-    local shortcuts=row(48)
-    for index,key in ipairs({"aquarium","shop","craft"}) do
-        button(shortcuts,t(key),UDim2.new((index-1)/3,5,0,5),UDim2.new(1/3,-10,0,38),function() travel(key) end)
-    end
-    if selectedTab=="tank" then
-        local f=row(106)
-        local lv=data.aquariumLevel
-        label(f,t("level").." "..lv.." · "..t("capacity").." "..Domain.occupied(data).."/"..Config.Aquarium[lv].capacity,UDim2.fromOffset(12,8),UDim2.new(1,-24,0,24),16)
-        button(f,lv<3 and (t("upgrade").." · "..Config.Aquarium[lv].nextCost.." "..t("coins")) or t("maxLevel"),UDim2.fromOffset(10,51),UDim2.new(1,-20,0,42),function() send("upgrade") end)
-    elseif selectedTab=="eggs" then
-        local f=row(180)
-        label(f,t("feedChoice"),UDim2.fromOffset(12,4),UDim2.new(1,-24,0,25),14)
-        for index,key in ipairs({"none","basic","premium"}) do
-            local count=key=="none" and "" or " ×"..data.feed[key]
-            button(f,(feedQuality==key and "✓ " or "")..t(key)..count,UDim2.new((index-1)/3,6,0,36),UDim2.new(1/3,-12,0,42),function() feedQuality=key;render() end,feedQuality==key and palette.line or palette.bg)
-        end
-        local entries=Domain.weights(data.aquariumLevel,feedQuality,Config.Feed[feedQuality].duration)
-        local total=0
-        for _,entry in ipairs(entries) do total+=entry.weight end
-        local parts={}
-        for _,entry in ipairs(entries) do table.insert(parts,t(Catalog[entry.id].rarity).." "..string.format("%.2f%%",100*entry.weight/total)) end
-        label(f,t("probabilities").."\n"..table.concat(parts," · "),UDim2.fromOffset(12,86),UDim2.new(1,-24,0,48),12,palette.mint)
-        label(f,t("snapshotted"),UDim2.fromOffset(12,139),UDim2.new(1,-24,0,32),11,palette.muted)
-    elseif selectedTab=="fish" then
-        local f=row(50)
-        label(f,t("basic").." ×"..data.feed.basic.."  ·  "..t("premium").." ×"..data.feed.premium,UDim2.fromOffset(12,5),UDim2.new(1,-24,1,-10),13,palette.mint)
-    elseif selectedTab=="pets" then
-        local f=row(60)
-        local pet=data.items[data.equippedPet]
-        label(f,t("buff")..": "..(pet and t(pet.species) or t("noPet")),UDim2.fromOffset(12,5),UDim2.new(1,-24,1,-10),14,palette.mint)
-    end
+    if not modal.Visible then return end
+    panelTitle.Text=t(tab=="help" and "controls" or "bagTitle")
+    locationLabel.Text=t(({shop="nearShop",craft="nearCraft",aquarium="nearAquarium",bag="nearBag"})[context])
+    back.Text="‹  "..t("back")
+    for key,b in pairs(tabButtons) do b.Text=t(key);b.BackgroundColor3=tab==key and C.accent or C.card end
+    local helpMode=tab=="help"
+    tabs.Visible=not helpMode and not (portraitDetail and not metrics.split)
+    back.Visible=helpMode or (portraitDetail and not metrics.split)
+    gridPane.Visible=not helpMode and (metrics.split or not portraitDetail)
+    footer.Visible=gridPane.Visible
+    detail.Visible=not helpMode and (metrics.split or portraitDetail)
+    fullPage.Visible=helpMode
+    if helpMode then detailModel=nil;renderHelp();return end
+    clear(grid,gridLayout)
     local items={}
-    for _,item in pairs(data.items) do
-        if (selectedTab=="fish" and item.kind=="fish") or (selectedTab=="eggs" and item.kind=="egg") or (selectedTab=="pets" and item.kind=="pet") or (selectedTab=="tank" and item.location=="aquarium") then table.insert(items,item) end
+    if data then
+        for _,item in pairs(data.items) do
+            if (tab=="fish" and item.kind=="fish") or (tab=="eggs" and item.kind=="egg") or (tab=="pets" and item.kind=="pet") or (tab=="tank" and item.location=="aquarium") then table.insert(items,item) end
+        end
     end
     table.sort(items,function(a,b) if a.obtainedAt==b.obtainedAt then return a.id<b.id end;return a.obtainedAt>b.obtainedAt end)
-    for _,item in ipairs(items) do itemCard(item) end
-    if #items==0 then local f=row(90);label(f,t(selectedTab=="tank" and "emptyTank" or "empty"),UDim2.fromOffset(12,8),UDim2.new(1,-24,1,-16),14,palette.muted) end
-    task.defer(function() content.CanvasPosition=previousScroll end)
+    local maxPage=math.max(1,math.ceil(#items/Visual.UI.CardPageSize))
+    page=math.clamp(page,1,maxPage)
+    pageLabel.Text=page.." / "..maxPage.."  ·  "..#items
+    prev.Active=page>1;prev.AutoButtonColor=prev.Active;nextPage.Active=page<maxPage;nextPage.AutoButtonColor=nextPage.Active
+    if tab=="tank" and data then
+        local summary=W.button(grid,t("level").." "..data.aquariumLevel.."\n"..Domain.occupied(data).." / "..Config.Aquarium[data.aquariumLevel].capacity.."\n"..t("upgrade"),UDim2.new(),UDim2.fromOffset(metrics.cardWidth,metrics.cardHeight),function()
+            selectedId="__tank";portraitDetail=true;render()
+        end)
+        summary.LayoutOrder=0
+    end
+    for index=(page-1)*Visual.UI.CardPageSize+1,math.min(#items,page*Visual.UI.CardPageSize) do
+        local item=items[index];local def=Catalog[item.species]
+        local card=W.button(grid,"",UDim2.new(),UDim2.fromOffset(metrics.cardWidth,metrics.cardHeight),function() selectedId=item.id;portraitDetail=true;render() end)
+        card.LayoutOrder=index
+        if selectedId==item.id then card.BackgroundColor3=Color3.fromRGB(230,237,211);card:FindFirstChildOfClass("UIStroke").Color=C.water end
+        W.frame(card,{Position=UDim2.fromOffset(8,8),Size=UDim2.fromOffset(6,6),BackgroundColor3=C[def.rarity]})
+        W.viewport(card,item.species,UDim2.fromOffset(5,8),UDim2.new(1,-10,1,-63))
+        local name=W.label(card,t(item.species),UDim2.new(0,8,1,-51),UDim2.new(1,-16,0,24),13,C.ink,true);name.TextXAlignment=Enum.TextXAlignment.Center
+        local state=item.id==data.equippedPet and t("equippedLabel") or (item.location=="aquarium" and t("inTank") or t(def.rarity))
+        local rarity=W.label(card,state,UDim2.new(0,8,1,-27),UDim2.new(1,-16,0,20),11,C[def.rarity]);rarity.TextXAlignment=Enum.TextXAlignment.Center
+    end
+    if #items==0 and tab~="tank" then
+        local empty=W.label(grid,t(data and "bagEmpty" or "loading"),UDim2.new(),UDim2.fromOffset(metrics.listWidth-8,170),14,C.muted)
+        empty.LayoutOrder=1
+    end
+    renderDetail()
 end
-for index,key in ipairs({"fish","eggs","pets","tank","help"}) do
-    local b=button(tabs,t(key),UDim2.new(),UDim2.fromOffset(92,34),function() selectedTab=key;content.CanvasPosition=Vector2.zero;render() end)
-    b.LayoutOrder=index;tabButtons[key]=b
+for index,key in ipairs({"fish","eggs","pets","tank"}) do
+    local b=W.button(tabs,t(key),UDim2.new((index-1)/4,3,0,0),UDim2.new(.25,-6,1,0),function() tab=key;page=1;selectedId=nil;portraitDetail=false;grid.CanvasPosition=Vector2.zero;render() end)
+    tabButtons[key]=b
 end
-for index,key in ipairs({"inventory","dock","aquarium","shop","craft","rod","help"}) do
-    local b=button(nav,t(key),UDim2.new(),UDim2.fromOffset(key=="inventory" and 78 or 102,36),function()
-        if key=="inventory" then open(selectedTab)
-        elseif key=="help" then open("help")
-        elseif key=="rod" then Action:FireServer("rod")
-        else travel(key) end
-    end,key=="inventory" and palette.accent or palette.bg)
-    if key=="inventory" then b.TextColor3=palette.bg end
-    b.LayoutOrder=index;navButtons[key]=b
-end
-local function resize()
+bag.Activated:Connect(function() if modal.Visible then closeBag() else openBag() end end)
+close.Activated:Connect(closeBag)
+help.Activated:Connect(function() tab="help";portraitDetail=false;render() end)
+back.Activated:Connect(function() if tab=="help" then tab="fish" end;portraitDetail=false;selectedId=nil;render() end)
+prev.Activated:Connect(function() if page>1 then page-=1;render();grid.CanvasPosition=Vector2.zero end end)
+nextPage.Activated:Connect(function() page+=1;render();grid.CanvasPosition=Vector2.zero end)
+cancel.Activated:Connect(function() finishInput() end)
+resize=function()
     local size=gui.AbsoluteSize
-    local metrics=Layout.metrics(size.X,size.Y)
+    metrics=Layout.metrics(size.X,size.Y,touch)
     panel.Size=UDim2.fromOffset(metrics.panelWidth,metrics.panelHeight)
-    fishing.Size=UDim2.fromOffset(metrics.fishWidth,194)
-    fishing.Position=UDim2.new(.5,0,0,metrics.fishY)
-    toast.Position=UDim2.new(.5,0,0,metrics.fishY+200)
-    if size.Y<390 then toast.Position=UDim2.new(.5,0,0,6) end
+    gridPane.Size=UDim2.fromOffset(metrics.listWidth,metrics.panelHeight-184)
+    footer.Size=UDim2.fromOffset(metrics.listWidth,44)
+    detail.Position=UDim2.fromOffset(metrics.split and metrics.listWidth+28 or 12,122)
+    detail.Size=UDim2.fromOffset(metrics.detailWidth,metrics.panelHeight-138)
+    gridLayout.CellSize=UDim2.fromOffset(metrics.cardWidth,metrics.cardHeight)
+    gridLayout.FillDirectionMaxCells=metrics.columns
+    gauge.Position=UDim2.new(.5,0,0,metrics.gaugeY)
+    gauge.Size=UDim2.fromOffset(metrics.gaugeWidth,metrics.gaugeHeight)
+    gaugeNote.Visible=not metrics.compact
+    hint.AnchorPoint=Vector2.new(.5,0)
+    hint.Position=UDim2.new(.5,0,0,touch and metrics.portrait and size.Y-250 or size.Y-102)
+    hint.Size=UDim2.fromOffset(math.min(310,size.X-40),32)
+    actionButton.Position=UDim2.fromOffset(metrics.actionX,metrics.actionY)
+    waiting.AnchorPoint=Vector2.new(.5,0);waiting.Position=UDim2.new(.5,0,0,metrics.gaugeY+20)
+    waiting.Size=UDim2.fromOffset(math.min(270,size.X-80),28)
+    cancel.Position=UDim2.fromOffset(touch and metrics.actionX-56 or (size.X+metrics.gaugeWidth)/2+8,touch and metrics.actionY or metrics.gaugeY)
+    if not touch and size.X<500 then cancel.Position=UDim2.new(1,-54,0,metrics.gaugeY-48) end
+    result.Position=UDim2.new(.5,0,0,math.max(16,metrics.gaugeY-12));result.Size=UDim2.fromOffset(math.min(310,size.X-32),94)
+    toast.Size=UDim2.fromOffset(math.min(370,size.X-32),54)
+    if modal.Visible then render() end
+end
+local function hudResize()
+    local h=Layout.hud(topGui.AbsoluteSize.X)
+    brand.Visible=h.title;wallet.Visible=h.coins;petLabel.Visible=topGui.AbsoluteSize.X>=620
 end
 gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(resize)
-resize()
-local function press()
-    if overlay.Visible or not data then return end
-    if held then return end
-    held=true
-    local phase=fishState.phase
-    if phase=="Idle" or phase=="Success" or phase=="Failed" then
-        castPressed=true;FishingInput:FireServer("start")
-    elseif phase=="Resist" then FishingInput:FireServer("tap")
-    elseif phase=="Reel" then FishingInput:FireServer("hold") end
+topGui:GetPropertyChangedSignal("AbsoluteSize"):Connect(hudResize)
+local function equipped()
+    return player.Character and player.Character:FindFirstChild(Visual.RodName)~=nil
 end
-actionButton.InputBegan:Connect(function(input)
-    if input.UserInputType==Enum.UserInputType.Touch or input.UserInputType==Enum.UserInputType.MouseButton1 then
-        if not pointer then pointer=input;press() end
-    end
-end)
+local function atPier()
+    local r=player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if not r then return false end
+    local f=Config.Fishing
+    return math.abs(r.Position.X-f.DockX)<=f.DockHalfX and math.abs(r.Position.Z-f.DockZ)<=f.DockHalfZ and r.Position.Y>1 and r.Position.Y<12
+end
+local function press(input)
+    if modal.Visible or coreMenu or not data or not equipped() then return end
+    if pointer then return end
+    local action=Presentation.press(phase.phase,held)
+    if not action then return end
+    held=true;pointer=input
+    if action=="start" then castPressed=true end
+    FishingInput:FireServer(action)
+end
+for _,control in ipairs({hint,actionButton}) do
+    control.InputBegan:Connect(function(input)
+        if input.UserInputType==Enum.UserInputType.Touch or input.UserInputType==Enum.UserInputType.MouseButton1 then press(input) end
+    end)
+end
 UserInputService.InputBegan:Connect(function(input,processed)
-    if processed or UserInputService:GetFocusedTextBox() then return end
-    if input.KeyCode==Enum.KeyCode.F then press()
-    elseif input.KeyCode==Enum.KeyCode.B then if overlay.Visible then overlay.Visible=false else open() end
+    if processed or UserInputService:GetFocusedTextBox() or coreMenu then return end
+    if input.KeyCode==Enum.KeyCode.F then press(input)
+    elseif input.KeyCode==Enum.KeyCode.B then if modal.Visible then closeBag() else openBag() end
     elseif input.KeyCode==Enum.KeyCode.R then Action:FireServer("rod") end
 end)
 UserInputService.InputEnded:Connect(function(input)
-    if input.KeyCode==Enum.KeyCode.F or input==pointer or (input.UserInputType==Enum.UserInputType.MouseButton1 and pointer and pointer.UserInputType==Enum.UserInputType.MouseButton1) then release() end
+    if input==pointer or (input.KeyCode==Enum.KeyCode.F and pointer and pointer.KeyCode==Enum.KeyCode.F)
+        or (input.UserInputType==Enum.UserInputType.MouseButton1 and pointer and pointer.UserInputType==Enum.UserInputType.MouseButton1) then release() end
 end)
-UserInputService.WindowFocusReleased:Connect(release)
-local phaseKeys={Idle="idle",Charge="charge",Flight="flight",Waiting="waiting",Reel="reel",Resist="resist",Success="success",Failed="failed",Saving="savingCatch"}
-local function updateFishing()
-    local phase=fishState.phase
-    fishTitle.Text=t(phaseKeys[phase] or "idle")..(fishState.species and (" · "..t(fishState.species)) or "")
-    keyHint.Text=t("keyHint")
-    resistanceMark.Visible=phase=="Reel" or phase=="Resist"
-    local value=fishState.progress or 0
-    gaugeText.Text=t("progress").." · "..math.floor(value*100).."%"
-    fill.BackgroundColor3=palette.mint
-    resistanceText.Text=""
-    if phase=="Idle" or phase=="Charge" then
-        value=fishState.power or 0
-        gaugeText.Text=t("power").." · "..math.floor(value*100).."%"
-        actionButton.Text=t("castButton")
-    elseif phase=="Reel" then actionButton.Text=t("reelButton")
-    elseif phase=="Resist" then
-        value=(fishState.taps or 0)/Config.Fishing.ResistanceTaps
-        gaugeText.Text=t("resistance").." · "..(fishState.taps or 0).."/"..Config.Fishing.ResistanceTaps
-        fill.BackgroundColor3=palette.accent
-        resistanceText.Text=string.format("%.1f",fishState.remaining or 0)..t("seconds")
-        actionButton.Text=t("tapButton")
-    elseif phase=="Success" or phase=="Failed" then actionButton.Text=t("castButton")
-    else actionButton.Text=t("waitingButton") end
+UserInputService.WindowFocusReleased:Connect(finishInput)
+GuiService.MenuOpened:Connect(function() coreMenu=true;finishInput();modal.Visible=false;toast.Visible=false;updateFishing() end)
+GuiService.MenuClosed:Connect(function() coreMenu=false;updateFishing() end)
+updateFishing=function()
+    local state=phase.phase
+    local v=Presentation.view(state,equipped(),atPier(),modal.Visible,coreMenu)
+    gauge.Visible=v.gauge
+    hint.Visible=v.hint or (v.gauge and not touch)
+    hint.Text=t(atPier() and (touch and "touchHint" or "idleHint") or "walkPier")
+    if state=="Reel" then hint.Text=t("holdHint") elseif state=="Resist" then hint.Text=t("tapHint") end
+    actionButton.Visible=v.action and touch
+    actionButton.Text=t(state=="Reel" and "reelShort" or (state=="Resist" and "tapShort" or "castShort"))
+    waiting.Visible=v.waiting
+    waiting.Text=t(state=="Saving" and "savingCatch" or (state=="Flight" and "flight" or "waiting"))
+    cancel.Visible=v.cancel
+    local value=phase.progress or 0
+    gaugeTitle.Text=t("progress");gaugeNumber.Text=math.floor(value*100).."%";gaugeNote.Text=t("holdHint")
+    fill.BackgroundColor3=C.water;marker.Visible=state=="Reel"
+    if state=="Charge" then
+        value=phase.power or 0;gaugeTitle.Text=t("power");gaugeNumber.Text=math.floor(value*100).."%";gaugeNote.Text=t("charge")
+    elseif state=="Resist" then
+        value=(phase.taps or 0)/Config.Fishing.ResistanceTaps
+        gaugeTitle.Text=t("resistance").."  "..(phase.taps or 0).."/"..Config.Fishing.ResistanceTaps
+        gaugeNumber.Text=string.format("%.1f",phase.remaining or 0)..t("seconds");gaugeNote.Text=t("tapHint");fill.BackgroundColor3=C.accent
+    end
     fill.Size=UDim2.fromScale(math.clamp(value,0,1),1)
-    cancelButton.Visible=phase~="Idle" and phase~="Success" and phase~="Failed"
+    result.Visible=os.clock()<resultDeadline and not modal.Visible and not coreMenu and (state=="Idle" or state=="Success" or state=="Failed")
 end
 remotes.FishingState.OnClientEvent:Connect(function(state)
-    fishState=state
-    if state.phase=="Failed" or state.phase=="Success" or state.phase=="Idle" then held=false;castPressed=false end
-    updateFishing()
+    local previous=phase.phase
+    phase=state
+    if state.phase=="Reel" and previous=="Waiting" then notify("biteNow")
+    elseif state.phase=="Reel" and previous=="Resist" then notify("resistCleared");TweenService:Create(gauge,TweenInfo.new(.35),{BackgroundColor3=C.panel}):Play() end
+    if state.phase=="Success" then showResult(state.species,"caughtLabel")
+    elseif state.phase=="Failed" then showResult(nil) end
+    if state.phase=="Failed" or state.phase=="Success" or state.phase=="Idle" then held=false;castPressed=false;pointer=nil end
     if state.phase=="Success" or state.phase=="Failed" then
-        local exact=state
-        task.delay(2.5,function() if fishState==exact then fishState={phase="Idle"};updateFishing() end end)
+        task.delay(Visual.UI.ResultSeconds,function() if phase==state then phase={phase="Idle"};updateFishing() end end)
     end
+    updateFishing()
 end)
 remotes.Snapshot.OnClientEvent:Connect(function(snapshot)
-    data=snapshot;snapshotAt=os.clock();actionPendingUntil=0
-    money.Text=t("coins").." "..data.coins
-    saveLabel.Text=t(data.saveStatus)
-    saveLabel.TextColor3=data.saveStatus=="memory" and palette.accent or palette.mint
-    render()
+    local previous=data
+    data=snapshot;snapshotAt=os.clock();pendingUntil=0
+    coins.Text=tostring(data.coins)
+    local pet=data.items[data.equippedPet]
+    petLabel.Text=pet and (t(pet.species).." · "..t("equippedLabel")) or ""
+    saveDot.BackgroundColor3=data.saveStatus=="memory" and C.accent or C.good
+    if previous then
+        for id,item in pairs(data.items) do
+            if item.kind=="pet" and previous.items[id] and previous.items[id].kind=="egg" then showResult(item.species,"hatchLabel");break end
+        end
+    elseif data.saveStatus=="memory" then notify("memory") end
+    context=location()
+    if selectedId and selectedId~="__tank" and not data.items[selectedId] then selectedId=nil;portraitDetail=false end
+    if modal.Visible then render() end
 end)
 remotes.SaveStatus.OnClientEvent:Connect(function(status)
-    saveLabel.Text=t(status);saveLabel.TextColor3=status=="error" and palette.red or (status=="memory" and palette.accent or palette.mint)
     if data then data.saveStatus=status end
+    saveDot.BackgroundColor3=status=="error" and C.bad or (status=="memory" and C.accent or C.good)
+    if status=="error" then notify("error") end
 end)
-remotes.Notice.OnClientEvent:Connect(function(key) actionPendingUntil=0;notify(key) end)
-remotes.OpenPanel.OnClientEvent:Connect(open)
+remotes.Notice.OnClientEvent:Connect(function(key) pendingUntil=0;notify(key) end)
+remotes.OpenPanel.OnClientEvent:Connect(function(which) selectedId=nil;page=1;openBag(which) end)
 local elapsed=0
 RunService.Heartbeat:Connect(function(dt)
     elapsed+=dt
-    if elapsed<.15 then return end
+    if elapsed<Visual.UI.HoldInterval then return end
     elapsed=0
-    if held and fishState.phase=="Reel" and not overlay.Visible then FishingInput:FireServer("hold") end
-    if data then
-        local now=data.serverTime+os.clock()-snapshotAt
-        for _,entry in ipairs(timers) do
-            if entry.label.Parent then
-                local remaining=math.max(0,math.ceil(entry.readyAt-now))
-                entry.label.Text=remaining==0 and t("ready") or (t("incubating").." · "..remaining..t("seconds"))
-            end
-        end
-        money.Text=t("coins").." "..data.coins
-        saveLabel.Text=t(data.saveStatus)
+    if held and phase.phase=="Reel" and not modal.Visible and not coreMenu then FishingInput:FireServer("hold") end
+    for _,entry in ipairs(timers) do
+        if entry.label.Parent then local remaining=math.max(0,math.ceil(entry.readyAt-serverNow()));entry.label.Text=remaining==0 and t("ready") or (t("incubating").." · "..remaining..t("seconds")) end
     end
-    title.Text=t("title")
-    for key,b in pairs(navButtons) do b.Text=t(key) end
+    local nextContext=location()
+    if nextContext~=context then context=nextContext;if modal.Visible then render() end end
     updateFishing()
 end)
-player.CharacterAdded:Connect(function() held=false;castPressed=false;fishState={phase="Idle"};updateFishing() end)
+RunService.RenderStepped:Connect(function(dt)
+    if modal.Visible and detail.Visible and detailModel and detailModel.Parent then detailModel:PivotTo(detailModel:GetPivot()*CFrame.Angles(0,dt*.35,0)) end
+end)
+player.CharacterAdded:Connect(function() release();phase={phase="Idle"};modal.Visible=false;resultDeadline=0 end)
+resize();hudResize();updateFishing()
 task.spawn(function()
-    for _=1,12 do
-        Action:FireServer("sync")
-        if data then return end
-        task.wait(2)
-    end
+    for _=1,12 do Action:FireServer("sync");if data then return end;task.wait(2) end
 end)

@@ -3,16 +3,109 @@
   "tree": {
     "$className": "DataModel",
     "Workspace": {
-      "$properties": {"FilteringEnabled": true, "StreamingEnabled": false, "Gravity": 196.2},
-      "World": {"$path": "src/world.model.json"}
+      "$properties": {
+        "FilteringEnabled": true,
+        "StreamingEnabled": false,
+        "Gravity": 196.2
+      },
+      "World": {
+        "$path": "src/world.model.json"
+      }
     },
-    "ReplicatedStorage": {"Shared": {"$path": "src/shared"}},
-    "ServerScriptService": {"Server": {"$path": "src/server"}},
+    "ReplicatedStorage": {
+      "Shared": {
+        "$path": "src/shared"
+      }
+    },
+    "ServerScriptService": {
+      "Server": {
+        "$path": "src/server"
+      }
+    },
     "StarterPlayer": {
-      "$properties": {"CameraMinZoomDistance": 8, "CameraMaxZoomDistance": 60, "CharacterWalkSpeed": 20},
-      "StarterPlayerScripts": {"Client": {"$path": "src/client"}}
+      "$properties": {
+        "CameraMinZoomDistance": 8,
+        "CameraMaxZoomDistance": 48,
+        "CharacterWalkSpeed": 20
+      },
+      "StarterPlayerScripts": {
+        "Client": {
+          "$path": "src/client"
+        }
+      }
     },
-    "Lighting": {"$properties": {"ClockTime": 14, "Brightness": 2, "Ambient": [0.55, 0.65, 0.68], "OutdoorAmbient": [0.6, 0.7, 0.75]}},
-    "SoundService": {"$properties": {"RespectFilteringEnabled": true}}
+    "Lighting": {
+      "$properties": {
+        "ClockTime": 16.2,
+        "Brightness": 2.1,
+        "Ambient": [
+          0.47,
+          0.53,
+          0.48
+        ],
+        "OutdoorAmbient": [
+          0.61,
+          0.66,
+          0.59
+        ],
+        "GlobalShadows": true,
+        "ShadowSoftness": 0.35,
+        "ExposureCompensation": 0.08,
+        "EnvironmentDiffuseScale": 0.55,
+        "EnvironmentSpecularScale": 0.65
+      },
+      "Air": {
+        "$className": "Atmosphere",
+        "$properties": {
+          "Density": 0.2,
+          "Offset": 0.1,
+          "Color": [
+            0.85,
+            0.9,
+            0.83
+          ],
+          "Decay": [
+            0.56,
+            0.67,
+            0.66
+          ],
+          "Glare": 0.12,
+          "Haze": 1.3
+        }
+      },
+      "Grade": {
+        "$className": "ColorCorrectionEffect",
+        "$properties": {
+          "Brightness": 0.015,
+          "Contrast": 0.04,
+          "Saturation": 0.08,
+          "TintColor": [
+            1,
+            0.98,
+            0.93
+          ]
+        }
+      },
+      "SoftBloom": {
+        "$className": "BloomEffect",
+        "$properties": {
+          "Intensity": 0.12,
+          "Size": 24,
+          "Threshold": 1.5
+        }
+      },
+      "SunRays": {
+        "$className": "SunRaysEffect",
+        "$properties": {
+          "Intensity": 0.025,
+          "Spread": 0.7
+        }
+      }
+    },
+    "SoundService": {
+      "$properties": {
+        "RespectFilteringEnabled": true
+      }
+    }
   }
 }
