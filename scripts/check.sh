@@ -6,4 +6,5 @@ for source in src/shared/*.lua src/server/*.lua src/client/*.lua; do
     luau-compile "$source" > /dev/null
 done
 python3 scripts/run_tests.py
+luau tests/functional.spec.luau
 python3 scripts/validate_place.py

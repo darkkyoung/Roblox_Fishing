@@ -1,7 +1,7 @@
 --!strict
 -- Test balance only. No Robux or commerce integrations.
 return {
-    Version = "0.1.0",
+    Version = "0.2.0",
     Locale = "ko",
     StudioPersistence = false, -- Explicit opt-in; separate Studio datastore namespace.
     StudioDebug = true, -- Also gated by RunService:IsStudio() on the server.
@@ -12,7 +12,6 @@ return {
     SaveAttempts = 3,
     LeaseSeconds = 180,
     RenewSeconds = 40,
-    StationRadius = 18,
     Fishing = {
         ChargeSeconds = 1.8,
         MinDistance = 8,
@@ -29,8 +28,6 @@ return {
         SessionTimeout = 45,
         MaxChargeSeconds = 8,
         Cooldown = 1,
-        DockX = 0, DockZ = 19, DockHalfX = 7, DockHalfZ = 15,
-        PondZ = -4, WaterY = 0.2,
     },
     CatchTable = {
         {id = "silver", weight = 55},

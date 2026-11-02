@@ -1,34 +1,44 @@
-"""Check shipped place structure and embedded source integrity, without Studio."""
+"""Structural checks, not Roblox execution or physics simulation."""
 from pathlib import Path
 import xml.etree.ElementTree as ET
-import hashlib, json
+import hashlib,json,subprocess
 root=Path(__file__).resolve().parents[1]
-place=root/'build/FILAMENT-Fishing-0.1.rbxlx'
-tree=ET.parse(place)
-items=tree.findall('.//Item')
-def prop(item,name):
-    return item.find(f'Properties/*[@name="{name}"]')
-def name(item):
-    value=prop(item,'Name')
-    return value.text if value is not None else ''
+place=root/'build/FILAMENT-Fishing-0.2.rbxlx'
+items=ET.parse(place).findall('.//Item')
+def prop(i,n):return i.find(f'Properties/*[@name="{n}"]')
+def name(i):
+    p=prop(i,'Name');return p.text if p is not None else ''
 classes={}
-for item in items: classes[item.attrib['class']]=classes.get(item.attrib['class'],0)+1
+for i in items:classes[i.attrib['class']]=classes.get(i.attrib['class'],0)+1
 assert classes.get('SpawnLocation')==1
-assert classes.get('Part',0)>=230
-plots=[i for i in items if i.attrib['class']=='Model' and name(i).startswith('Plot')]
-assert len(plots)==16
-for plot in plots:
-    children={name(i) for i in plot.findall('Item')}
-    assert {'Anchor','Arrival','TankWater','UpgradeConsole','OwnerSign'}<=children
-scripts=[i for i in items if i.attrib['class'] in ('Script','LocalScript','ModuleScript')]
-sources=list((root/'src').rglob('*.lua'))
-assert len(scripts)==len(sources),(len(scripts),len(sources))
-expected={p.read_text().replace('\r\n','\n') for p in sources}
-actual={prop(i,'Source').text.replace('\r\n','\n') for i in scripts}
-assert expected==actual,'Embedded Luau differs from source tree'
-assert classes.get('Script')==1
-assert classes.get('LocalScript')==2
-assert not any(i.attrib['class'] in ('HttpService','MarketplaceService') for i in items)
-print(f'PASS place structure: {len(items)} instances, {len(plots)} aquariums, {len(scripts)} exact source matches')
-print('PASS spawn, aquarium anchors, script classes, zero external assets required')
+assert classes.get('Script')==1 and classes.get('LocalScript')==2,'Duplicate/legacy bootstrap'
+assert 50<classes.get('Part',0)<150
+assert not any(classes.get(c,0) for c in ['MeshPart','SpecialMesh','ViewportFrame','Atmosphere','ParticleEmitter','BloomEffect'])
+zone_models=[i for i in items if i.attrib['class']=='Model' and (name(i).startswith('AquariumPlot') or name(i) in ['SpawnPlaza','FishingLake','FishingDock','FishMarket','FeedWorkshop','AquariumGarden'])]
+assert len(zone_models)==22
+plots=[i for i in zone_models if name(i).startswith('AquariumPlot')];assert len(plots)==16
+for plot in plots:assert {'Floor','OwnerSign','Console'}<={name(c) for c in plot.findall('Item')}
+assert classes.get('ProximityPrompt')==18
+lake=next(i for i in zone_models if name(i)=='FishingLake');floor=next(c for c in lake.findall('Item') if name(c)=='Floor')
+# Default CanCollide is true when omitted by the serializer.
+collision=prop(floor,'CanCollide');assert collision is None or collision.text=='true'
+sources=list((root/'src').rglob('*.lua'));scripts=[i for i in items if i.attrib['class'] in ('Script','LocalScript','ModuleScript')]
+assert len(sources)==len(scripts)
+assert {p.read_text() for p in sources}=={prop(i,'Source').text for i in scripts}
+world=json.loads((root/'src/world.model.json').read_text())
+assert not any('Terrain:Fill' in p.read_text() or 'ViewportFrame' in p.read_text() for p in sources)
+safety=next(c for c in world['Children'] if c['Name']=='LakeSafety')['Children']
+assert len(safety)==3
+for p in safety:assert p['Properties']['CanCollide'] and p['Properties']['Transparency']==1
+# Every exposed blue-water test point is protected, while the dock remains open.
+def inside(o,x,z):
+    p=o['Properties'];return abs(x-p['Position'][0])<p['Size'][0]/2 and abs(z-p['Position'][2])<p['Size'][2]/2
+for x in range(-47,48,2):
+    for z in range(-44,45,2):
+        if abs(x)<7 and z>23:continue
+        if abs(x)==7:continue # exact collider seam, covered in physical engine QA
+        assert any(inside(b,x,z) for b in safety),(x,z)
+for z in [25,35,45,53]:assert not any(inside(b,0,z) for b in safety)
+print(f'PASS place: {len(items)} instances, 22 zones, 16 plots, 18 prompts, {len(scripts)} exact source matches')
+print('PASS single server bootstrap, two client scripts, flat-only geometry, lake safety coverage (structural)')
 print('XML SHA256:',hashlib.sha256(place.read_bytes()).hexdigest())

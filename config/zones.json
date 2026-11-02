@@ -1,0 +1,20 @@
+{
+  "rodName": "Rod",
+  "ground": {"position": [0, -1, -24], "size": [216, 1, 244]},
+  "zones": [
+    {"id":"SpawnPlaza","type":"spawn","position":[0,0.5,74],"size":[36,1,22],"color":[220,203,167],"label":{"ko":"입구 / 스폰","en":"Spawn Plaza"}},
+    {"id":"FishingLake","type":"lake","position":[0,0,0],"size":[96,1,90],"color":[59,142,213],"label":{"ko":"낚시 연못","en":"Fishing Lake"}},
+    {"id":"FishingDock","type":"dock","position":[0,1,39],"size":[14,1,32],"color":[137,93,55],"interactionDistance":15,"label":{"ko":"낚시 부두 · F 유지/놓기","en":"Fishing Dock · Hold / release F"}},
+    {"id":"FishMarket","type":"market","position":[-74,0.5,43],"size":[28,1,22],"color":[233,144,57],"interactionDistance":14,"label":{"ko":"물고기 상점","en":"Fish Market"}},
+    {"id":"FeedWorkshop","type":"workshop","position":[-74,0.5,-25],"size":[28,1,24],"color":[154,108,204],"interactionDistance":14,"label":{"ko":"사료 공방","en":"Feed Workshop"}},
+    {"id":"AquariumGarden","type":"garden","position":[28,0.5,-102],"size":[128,1,84],"color":[67,171,167],"label":{"ko":"개인 수족관 · 16개","en":"Aquarium Garden · 16 Plots"}}
+  ],
+  "plots":{"columns":[-20,12,44,76],"rows":[-73,-93,-113,-133],"size":[24,0.4,16],"y":1.2,"interactionDistance":15},
+  "paths":[
+    {"id":"SpawnToDock","position":[0,0.5,60],"size":[14,1,18]},
+    {"id":"SouthWalk","position":[-28,0.5,58],"size":[70,1,8]},
+    {"id":"WestWalk","position":[-55,0.5,4],"size":[10,1,108]},
+    {"id":"NorthWalk","position":[12,0.5,-55],"size":[144,1,10]},
+    {"id":"EastWalk","position":[54,0.5,4],"size":[12,1,108]}
+  ]
+}

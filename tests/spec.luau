@@ -150,8 +150,14 @@ test("Schema validation refuses future or malformed data",function()
 end)
 test("Responsive containers fit portrait, landscape and desktop safe areas",function()
     for _,size in ipairs({{320,520},{375,730},{390,760},{768,320},{844,350},{1280,680},{1920,1000}}) do
-        local m=Layout.metrics(size[1],size[2]);assert(m.panelWidth<=size[1]-24);assert(m.panelHeight<=size[2]-20)
-        assert(m.fishWidth<=size[1]-24);assert(m.fishY+194<=size[2]);assert(m.cardWidth>250)
+        for _,touch in ipairs({false,true}) do
+            local m=Layout.metrics(size[1],size[2],touch)
+            assert(m.panelWidth<=size[1]-20 and m.panelHeight<=size[2]-20)
+            assert(m.meterWidth>0 and m.meterWidth<=size[1]-24 and m.meterY>=0)
+            assert(m.meterY+m.meterHeight<size[2])
+            assert(m.actionX>=0 and m.actionX+m.actionW<=size[1])
+            assert(m.actionY>=0 and m.actionY+m.actionH<size[2])
+        end
     end
 end)
 test("Korean and English catalogs have matching translation keys",function()

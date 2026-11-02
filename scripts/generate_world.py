@@ -1,39 +1,65 @@
-"""Generate asset-free, editable Rojo map. All geometry is included in the place."""
-import json,pathlib
-ROOT=pathlib.Path(__file__).resolve().parents[1]
-def part(name,pos,size,color,**extra):
- props=dict(Anchored=True,Position=pos,Size=size,Color=[c/255 for c in color],TopSurface='Smooth',BottomSurface='Smooth')
- props.update(extra)
- return {'ClassName':'Part','Name':name,'Properties':props}
-def sign(name,text,pos,color=(24,55,64)):
- p=part(name,pos,[12,4,.4],color,CanCollide=False)
- p['Children']=[{'ClassName':'SurfaceGui','Name':'Label','Properties':{'Face':'Back','PixelsPerStud':45},'Children':[{'ClassName':'TextLabel','Name':'Text','Properties':{'Size':{'UDim2':[[1,0],[1,0]]},'BackgroundTransparency':1,'Text':text,'TextScaled':True,'TextColor3':[1,.96,.85],'Font':'GothamBold','TextWrapped':True}}]}]
- return p
-children=[]
-children += [part('LakeBed',[0,-6,0],[110,4,84],(194,174,130)),part('Plaza',[0,-2,116],[160,4,164],(99,154,112)),part('WestBank',[-68,-2,0],[28,4,84],(99,154,112)),part('EastBank',[68,-2,0],[28,4,84],(99,154,112)),part('NorthBank',[0,-2,-53],[160,4,22],(99,154,112))]
-children += [part('WaterPreview',[0,0,0],[108,.3,82],(70,181,197),Transparency=.45,CanCollide=False,Material='Glass'),part('Promenade',[0,.1,45],[150,.3,14],(219,199,161)),part('Pier',[0,1.2,23],[10,1,38],(144,103,73),Material='WoodPlanks')]
-for z in range(6,43,6):
- for x in [-5,5]:children.append(part('PierPost',[x,0,z],[.6,5,.6],(100,75,56),Material='Wood'))
-spawn=part('Spawn',[0,.5,46],[6,1,6],(255,178,80),Transparency=.45)
-spawn['ClassName']='SpawnLocation';spawn['Properties'].update(Neutral=True,Duration=0)
-children.append(spawn)
-children += [sign('Welcome','FILAMENT\nFISHING · PRIVATE PoC',[0,7,57]),sign('FishingSign','FISHING\n부두에서 낚시',[-12,4,35]),sign('AquariumSign','YOUR AQUARIUM\n개인 수족관',[0,7,65])]
-for name,x,text,col in [('Shop',-28,'FISH MARKET\n물고기 판매',(255,166,98)),('Craft',28,'FEED WORKSHOP\n사료 제작',(167,155,227))]:
- st=part(name,[x,2,44],[10,4,7],col,Material='WoodPlanks')
- st['Children']=[{'ClassName':'ProximityPrompt','Name':'Prompt','Properties':{'ActionText':'열기 / Open','ObjectText':text.split('\n')[0],'HoldDuration':0,'MaxActivationDistance':14,'RequiresLineOfSight':False}}]
- children.extend([st,part(name+'Roof',[x,5,44],[13,1,10],(35,78,83)),sign(name+'Sign',text,[x,7.7,48])])
-plots=[]
-for i in range(16):
- x=-54+(i%4)*36;z=83+(i//4)*32
- pieces=[part('Platform',[x,.25,z],[30,.5,27],(220,210,180)),part('Base',[x,1,z],[22,1,12],(33,69,75)),part('TankWater',[x,4.1,z],[20,5,10],(81,191,200),Transparency=.68,CanCollide=False,Material='Glass')]
- for suffix,pos,size in [('Front',[x,4,z+6],[22,6,.25]),('Back',[x,4,z-6],[22,6,.25]),('Left',[x-11,4,z],[.25,6,12]),('Right',[x+11,4,z],[.25,6,12])]:
-  pieces.append(part(suffix,pos,size,(174,231,234),Transparency=.8,Material='Glass'))
- pieces += [part('Anchor',[x,4,z],[1,1,1],(255,255,255),Transparency=1,CanCollide=False),part('Arrival',[x,2,z+11],[1,1,1],(255,255,255),Transparency=1,CanCollide=False),sign('OwnerSign','VACANT',[x,8,z-6]),part('UpgradeConsole',[x+13,2,z+6],[2,3,3],(255,178,80))]
- plots.append({'ClassName':'Model','Name':f'Plot{i+1:02}','Children':pieces})
-children.append({'ClassName':'Folder','Name':'Aquariums','Children':plots})
-for i,(x,z) in enumerate([(-60,-45),(-37,-51),(-10,-50),(20,-51),(50,-45),(-73,35),(73,32),(-75,105),(75,138),(-75,170),(75,175)]):
- children.append(part('Trunk'+str(i),[x,4,z],[2,8,2],(118,88,63),Material='Wood'))
- children.append(part('Canopy'+str(i),[x,10,z],[10,10,10],(55+(i%3)*10,119+(i%2)*15,88),Shape='Ball',Material='Grass'))
-for i in range(7):children.append(part('Lily'+str(i),[-32+i*9,.4,-22-(i%2)*6],[3,.15,3],(105,153,92),Shape='Cylinder',Orientation=[0,0,90],CanCollide=False))
-(ROOT/'src/world.model.json').write_text(json.dumps({'ClassName':'Model','Children':children},ensure_ascii=False,indent=2))
-print('World generated:',len(children),'top-level objects, 16 aquarium plots')
+"""Phase 0.2 flat blockout. config/zones.json is the one geometry source.
+Generates ZoneConfig.lua (runtime rules) and world.model.json (Studio geometry).
+"""
+from pathlib import Path
+import json
+ROOT=Path(__file__).resolve().parents[1]
+def lua(v):
+    if isinstance(v,str):return json.dumps(v,ensure_ascii=False)
+    if isinstance(v,bool):return 'true' if v else 'false'
+    if isinstance(v,(int,float)):return repr(v)
+    if isinstance(v,list):return '{'+','.join(lua(x) for x in v)+'}'
+    return '{'+','.join('['+lua(k)+']='+lua(x) for k,x in v.items())+'}'
+def part(name,pos,size,color,**more):
+    p={'Anchored':True,'Position':pos,'Size':size,'Color':[x/255 for x in color],'Material':'SmoothPlastic','TopSurface':'Smooth','BottomSurface':'Smooth'}
+    p.update(more)
+    return {'ClassName':'Part','Name':name,'Properties':p}
+def sign(name,text,pos,width=22):
+    p=part(name,pos,[width,3,.25],[45,54,67],CanCollide=False)
+    p['Children']=[{'ClassName':'SurfaceGui','Name':'Label','Properties':{'Face':'Back','SizingMode':'PixelsPerStud','PixelsPerStud':32},'Children':[{'ClassName':'TextLabel','Name':'Text','Properties':{'Size':{'UDim2':[[1,0],[1,0]]},'Text':text,'TextScaled':True,'TextWrapped':True,'Font':'Gotham','TextColor3':[1,1,1],'BackgroundTransparency':1}}]}]
+    return p
+
+def generate():
+    cfg=json.loads((ROOT/'config/zones.json').read_text());zones=cfg['zones'];plots=cfg['plots']
+    for z in zones:
+        x,y,zz=z['position'];z['arrival']=[x,y+z['size'][1]/2+3,zz+(5 if z['type'] in ['market','workshop'] else 0)]
+        z['interaction']=[x,y+z['size'][1]/2+1.5,zz]
+    for row,z in enumerate(plots['rows']):
+        for col,x in enumerate(plots['columns']):
+            i=row*4+col+1
+            zones.append({'id':f'AquariumPlot{i:02}','type':'plot','position':[x,plots['y'],z],'size':plots['size'],'color':[133,210,204],'interactionDistance':plots['interactionDistance'],'interaction':[x,2.4,z+6],'arrival':[x+4,4.5,z+6],'label':{'ko':f'수족관 {i:02}','en':f'Aquarium {i:02}'}})
+    cfg['zones']={z['id']:z for z in zones};cfg.pop('plots')
+    world=[part('Ground',cfg['ground']['position'],cfg['ground']['size'],[174,180,181])]
+    nodes=[]
+    for z in zones:
+        x,y,zz=z['position'];sx,sy,sz=z['size']
+        floor=part('Floor',z['position'],z['size'],z['color'])
+        children=[floor]
+        if z['type']=='spawn':
+            spawn=part('Spawn',[x,y+sy/2+.1,zz],[4,.2,4],[220,203,167],Transparency=1,CanCollide=False)
+            spawn['ClassName']='SpawnLocation';spawn['Properties'].update(Neutral=True,Duration=0,Enabled=True);children.append(spawn)
+        # Signs beside the dock/spawn, never across the initial view of the lake.
+        signx=x+(sx/2+8 if z['type'] in ['dock','spawn'] else 0)
+        signz=zz if z['type'] in ['dock','spawn'] else zz-sz/2+1
+        if z['type']!='lake':children.append(sign('OwnerSign' if z['type']=='plot' else 'Sign',z['label']['ko']+'\n'+z['label']['en'],[signx,5,signz],20 if z['type']!='plot' else 22))
+        if z['type'] in ['plot','market','workshop']:
+            console=part('Console',z['interaction'],[2,2,2],[61,67,80])
+            console['Children']=[{'ClassName':'ProximityPrompt','Name':'Prompt','Properties':{'ActionText':'열기 / Open','ObjectText':z['label']['en'],'HoldDuration':0,'MaxActivationDistance':z['interactionDistance'],'RequiresLineOfSight':False}}]
+            children.append(console)
+        nodes.append({'ClassName':'Model','Name':z['id'],'Children':children})
+    world.append({'ClassName':'Folder','Name':'Zones','Children':nodes})
+    world.append({'ClassName':'Folder','Name':'Paths','Children':[part(p['id'],p['position'],p['size'],[214,215,212]) for p in cfg['paths']]})
+    # Solid blue fallback floor plus three tall invisible collision boxes keep walkers out.
+    lake=cfg['zones']['FishingLake'];dock=cfg['zones']['FishingDock'];lx,_,lz=lake['position'];lw,_,ld=lake['size'];dx,_,dz=dock['position'];dw,_,dd=dock['size']
+    left,right=lx-lw/2,lx+lw/2;north,south=lz-ld/2,lz+ld/2;a,b=dx-dw/2,dx+dw/2;front=dz-dd/2
+    regions=[(left,a,north,south),(b,right,north,south),(a,b,north,front)]
+    blockers=[]
+    for i,(x1,x2,z1,z2) in enumerate(regions):
+        blockers.append(part('LakeGuard'+str(i+1),[(x1+x2)/2,8,(z1+z2)/2],[x2-x1,16,z2-z1],[59,142,213],Transparency=1,CanCollide=True,CanTouch=False))
+    world.append({'ClassName':'Folder','Name':'LakeSafety','Children':blockers})
+    for x in [-107,107]:world.append(part('Boundary',[x,8,-24],[1,18,244],[174,180,181],Transparency=1))
+    for z in [-145.5,97.5]:world.append(part('Boundary',[0,8,z],[216,18,1],[174,180,181],Transparency=1))
+    (ROOT/'src/shared/ZoneConfig.lua').write_text('-- GENERATED by scripts/generate_world.py; edit config/zones.json.\nreturn '+lua(cfg)+'\n')
+    (ROOT/'src/world.model.json').write_text(json.dumps({'ClassName':'Model','Children':world},ensure_ascii=False,indent=2)+'\n')
+    print('Generated flat zones:',len(zones),'including 16 plots; no terrain, external assets or decoration')
+if __name__=='__main__':generate()
