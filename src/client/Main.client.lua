@@ -14,7 +14,12 @@ local Domain=require(Shared.Domain).new(Config,Catalog,require(Shared.Util))
 local Presentation=require(Shared.Presentation)
 local Layout=require(Shared.Layout)
 local Strings=require(Shared.Strings)
-local remotes=ReplicatedStorage:WaitForChild("Remotes")
+local remotes=ReplicatedStorage:WaitForChild("Remotes",15)
+if not remotes then
+    warn("[FILAMENT CLIENT] Remotes unavailable. Boot="..tostring(ReplicatedStorage:GetAttribute("FilamentBootStatus"))
+        .."; stage="..tostring(ReplicatedStorage:GetAttribute("FilamentBootStage")).."; "..tostring(ReplicatedStorage:GetAttribute("FilamentBootError")))
+    return
+end
 local Action=remotes:WaitForChild("Action");local Input=remotes:WaitForChild("FishingInput")
 local locale=string.sub(player.LocaleId,1,2)=="ko" and "ko" or "en"
 local function t(key) return Strings[locale][key] or Strings.en[key] or tostring(key) end

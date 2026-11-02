@@ -1,0 +1,102 @@
+FILAMENT 0.2 P0 — automated checks only; Roblox Studio NOT RUN.
+Tools: Rojo 7.7.1, Luau 0.743, rbxmk 0.9.1, Python 3.
+16 core/config/existing test files compared byte-for-byte to 16d0051ebba3fb935a072079bd4cfaf466b77664.
+Generated flat zones: 22 including 16 plots; no terrain, external assets or decoration
+Building project 'FILAMENT Fishing Functional 0.2'
+Built project to FILAMENT-Fishing-0.2.rbxlx
+Building project 'FILAMENT Fishing Functional 0.2'
+Built project to FILAMENT-Fishing-0.2.rbxl
+PASS serialization: all 75 BaseParts have finite, identity-rotation CFrames; zero Position properties (JSON / RBXLX / decoded RBXL)
+PASS original coordinates: 22 floors, 1 Spawn, 5 paths, 3 lake guards, 4 boundaries, 18 consoles, 21 signs, 1 ground
+PASS AquariumPlot12.Floor serialized position = (76, 1.2, -113), tolerance 0.0001 studs
+PASS structure: 193 instances, 22 zones, 16 plots, 18 prompts, 22 exact script sources in both builds
+PASS single server bootstrap, two client scripts, flat-only geometry, lake safety coverage (structural)
+FILAMENT-Fishing-0.2.rbxl SHA256: b28f39442ab7006e6215da974f49ab7146c41dd86f6a8c8654175ea5227c653a
+FILAMENT-Fishing-0.2.rbxlx SHA256: a2058e8083e9fb00f117ca5c2d82db2654fd92ab73df9ea185845eec56dae023
+NOT RUN: Roblox Studio loading, server runtime, physics, HUD/input and multiplayer.
+PASS All catch rewards reachable with configured 5% egg probability
+PASS Unique item award cannot be replayed
+PASS Inventory bound prevents overflows
+PASS Sell is exactly once and credits correct coins
+PASS Placed fish cannot be sold or consumed until retrieved
+PASS Premium feed recipe consumes exactly one eligible fish
+PASS Two profiles cannot operate each other's identifiers
+PASS Tank capacity and upgrades enforce costs and limits
+PASS Egg placement validates feed before consuming or starting
+PASS Unfed egg uses 60 seconds and hatch frees tank capacity
+PASS Offline elapsed time hatches once without reroll on reconnect
+PASS Higher feed and level improve both upper-rarity probabilities
+PASS Incubation time influences odds and placement snapshots level
+PASS All three pets reachable including legendary at level one
+PASS Only pets equip; one slot; buff reaches actual fishing simulation
+PASS Server charge duration bounds power and waits for flight then bite
+PASS One resistance gate and valid taps allow full catch
+PASS Late or spammed resistance taps cannot win
+PASS Hold expires, stalls cannot jump progress, stale sessions expire
+PASS Lease prevents simultaneous owners and expired writers
+PASS Lease supports same-revision retries and rejects old revisions
+PASS Schema validation refuses future or malformed data
+PASS Responsive containers fit portrait, landscape and desktop safe areas
+PASS Korean and English catalogs have matching translation keys
+PASS Persistent profile commits before exposing data; reload restores inventory
+PASS Transient failure retries; ambiguous commit does not duplicate reward
+PASS Persistent failure freezes session without exposing unsaved candidate
+PASS Busy transactions reject concurrent item consumption
+PASS Studio temporary mode never accesses a cloud key
+PASS Offline hatch persists once across durable reconnects
+
+30 tests passed. Luau logic + mocked storage; NOT Studio execution.
+PASS Geography: south spawn, southwest market, northwest workshop, north garden
+PASS All 16 plot slots lie inside the separate garden
+PASS Only dock permits casting, including height and malformed-position rejection
+PASS All dock corners and casting powers land on exposed lake, never under dock
+PASS Water check rejects dry ground, wrong elevation and dock overlap
+PASS Station actions require correct zone bounds AND prompt distance
+PASS Player cannot place/retrieve/upgrade while standing on another plot
+PASS 16 distinct session allocations; 17th refused; leaving releases only own plot
+PASS Display slots are unique, bounded and independent between two owners
+PASS Integrated normal catch reaches each fish and egg reward without debug
+PASS Failed resistance produces no reward proposal
+PASS Same prepared reward cannot be granted twice
+PASS Integrated fish: capture, place, retrieve, sell; wrong zone and duplicate refused
+PASS Integrated craft consumes exactly one fish at workshop
+PASS Integrated egg, crafted feed, timed hatch, pet equip and actual fishing multipliers
+PASS Two profile inventories remain isolated even at permitted station
+PASS Upgrade uses own zone and unchanged cost/capacity
+PASS Every debug mutation is refused on live and with StudioDebug false
+PASS Separate debug fish/egg/feed/coin controls have bounded exact grants
+PASS Debug level rejects overflow, invalid input, and lowering below current occupancy
+PASS Debug instant hatch preserves incubation weights and labels result as DEBUG
+PASS Idle, waiting and finished states do not expose a fishing meter
+PASS Bag/native menu excludes all fishing controls; absent rod has no idle action
+PASS Input intent cannot advance waiting or convert hold into repeated resistance taps
+PASS UI exposes only zone-relevant actions and valid fish recipes
+PASS Incubating eggs have no retrieve action and pet slot has equip/unequip only
+PASS Touch meter, action, cancel targets stay separated in portrait and landscape
+PASS Compact HUD stays within native topbar free space with an accessible bag
+28 functional integration / zone / presentation tests passed; NOT Studio execution.
+test_all_75_transforms_match_independent_zone_specification (__main__.SerializationRegression.test_all_75_transforms_match_independent_zone_specification) ... ok
+test_generated_json_must_use_twelve_component_cframe (__main__.SerializationRegression.test_generated_json_must_use_twelve_component_cframe) ... ok
+test_missing_and_malformed_cframes_are_rejected (__main__.SerializationRegression.test_missing_and_malformed_cframes_are_rejected) ... ok
+test_missing_spawn_or_extra_part_is_rejected (__main__.SerializationRegression.test_missing_spawn_or_extra_part_is_rejected) ... ok
+test_original_position_only_defect_is_rejected (__main__.SerializationRegression.test_original_position_only_defect_is_rejected) ... ok
+test_rotation_and_nonfinite_coordinates_are_rejected (__main__.SerializationRegression.test_rotation_and_nonfinite_coordinates_are_rejected) ... ok
+test_wrong_coordinate_in_every_geometry_category_is_rejected (__main__.SerializationRegression.test_wrong_coordinate_in_every_geometry_category_is_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.048s
+
+OK
+PASS Production boot accepts all 22 XML-loaded floor transforms and creates dependencies (API doubles)
+PASS Production boot reports AquariumPlot12 expected and actual transforms before exposing dependencies
+PASS Missing baked floor fails immediately with full object path instead of waiting forever
+3 boot wiring/diagnostic tests passed using API doubles; NOT Roblox Studio runtime.
+PASS serialization: all 75 BaseParts have finite, identity-rotation CFrames; zero Position properties (JSON / RBXLX / decoded RBXL)
+PASS original coordinates: 22 floors, 1 Spawn, 5 paths, 3 lake guards, 4 boundaries, 18 consoles, 21 signs, 1 ground
+PASS AquariumPlot12.Floor serialized position = (76, 1.2, -113), tolerance 0.0001 studs
+PASS structure: 193 instances, 22 zones, 16 plots, 18 prompts, 22 exact script sources in both builds
+PASS single server bootstrap, two client scripts, flat-only geometry, lake safety coverage (structural)
+FILAMENT-Fishing-0.2.rbxl SHA256: b28f39442ab7006e6215da974f49ab7146c41dd86f6a8c8654175ea5227c653a
+FILAMENT-Fishing-0.2.rbxlx SHA256: a2058e8083e9fb00f117ca5c2d82db2654fd92ab73df9ea185845eec56dae023
+NOT RUN: Roblox Studio loading, server runtime, physics, HUD/input and multiplayer.
+PASS stale binary rejection: fixed XML + previous broken RBXL cannot pass validator (missing CFrame)

@@ -2,7 +2,13 @@
 local Players=game:GetService("Players")
 local RunService=game:GetService("RunService")
 local localPlayer=Players.LocalPlayer
-local visuals=workspace:WaitForChild("CollectionVisuals")
+local visuals=workspace:WaitForChild("CollectionVisuals",15)
+if not visuals then
+    local status=game:GetService("ReplicatedStorage")
+    warn("[FILAMENT CLIENT] CollectionVisuals unavailable. Boot="..tostring(status:GetAttribute("FilamentBootStatus"))
+        .."; stage="..tostring(status:GetAttribute("FilamentBootStage")).."; "..tostring(status:GetAttribute("FilamentBootError")))
+    return
+end
 local tracked={}
 local function add(m) if m:IsA("Model") and m:GetAttribute("VisualKind") then tracked[m]=true end end
 for _,m in ipairs(visuals:GetDescendants()) do add(m) end

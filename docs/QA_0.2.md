@@ -2,6 +2,8 @@
 
 **현재 아래 체크박스는 모두 미실행입니다.** 자동 58개 통과와 실제 엔진 검수는 다릅니다. 각 항목에 실제 결과/Output/빌드 SHA를 기록하세요.
 
+먼저 [P0 부팅 QA](P0_SERIALIZATION_HOTFIX.md#실제-studio-qa--미실행)를 수행하고 두 형식의 새 파일과 Output을 확인하세요. 이전 0.2 파일로 진행하지 마세요.
+
 ## 준비 및 공통 확인
 
 1. 새 `FILAMENT-Fishing-0.2.rbxl` 또는 `.rbxlx`를 Studio에서 엽니다. Output 창을 열고 **Play(F5)**를 누릅니다.

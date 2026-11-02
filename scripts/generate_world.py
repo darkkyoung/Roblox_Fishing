@@ -11,7 +11,9 @@ def lua(v):
     if isinstance(v,list):return '{'+','.join(lua(x) for x in v)+'}'
     return '{'+','.join('['+lua(k)+']='+lua(x) for k,x in v.items())+'}'
 def part(name,pos,size,color,**more):
-    p={'Anchored':True,'Position':pos,'Size':size,'Color':[x/255 for x in color],'Material':'SmoothPlastic','TopSurface':'Smooth','BottomSurface':'Smooth'}
+    # Position is derived at runtime; persist the full transform for Studio loading.
+    # Rojo 7 implicit CFrame: xyz, then the row-major 3x3 identity rotation.
+    p={'Anchored':True,'CFrame':[*pos,1,0,0,0,1,0,0,0,1],'Size':size,'Color':[x/255 for x in color],'Material':'SmoothPlastic','TopSurface':'Smooth','BottomSurface':'Smooth'}
     p.update(more)
     return {'ClassName':'Part','Name':name,'Properties':p}
 def sign(name,text,pos,width=22):

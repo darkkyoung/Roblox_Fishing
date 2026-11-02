@@ -6,10 +6,19 @@
       "Name": "Ground",
       "Properties": {
         "Anchored": true,
-        "Position": [
+        "CFrame": [
           0,
           -1,
-          -24
+          -24,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
         ],
         "Size": [
           216,
@@ -39,10 +48,19 @@
               "Name": "Floor",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   0,
                   0.5,
-                  74
+                  74,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   36,
@@ -64,10 +82,19 @@
               "Name": "Spawn",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   0,
                   1.1,
-                  74
+                  74,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   4,
@@ -94,10 +121,19 @@
               "Name": "Sign",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   26.0,
                   5,
-                  74
+                  74,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   20,
@@ -167,10 +203,19 @@
               "Name": "Floor",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   0,
                   0,
-                  0
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   96,
@@ -198,10 +243,19 @@
               "Name": "Floor",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   0,
                   1,
-                  39
+                  39,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   14,
@@ -223,10 +277,19 @@
               "Name": "Sign",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   15.0,
                   5,
-                  39
+                  39,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   20,
@@ -296,10 +359,19 @@
               "Name": "Floor",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   -74,
                   0.5,
-                  43
+                  43,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   28,
@@ -321,10 +393,19 @@
               "Name": "Sign",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   -74,
                   5,
-                  33.0
+                  33.0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   20,
@@ -388,10 +469,19 @@
               "Name": "Console",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   -74,
                   2.5,
-                  43
+                  43,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   2,
@@ -432,10 +522,19 @@
               "Name": "Floor",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   -74,
                   0.5,
-                  -25
+                  -25,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   28,
@@ -457,10 +556,19 @@
               "Name": "Sign",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   -74,
                   5,
-                  -36.0
+                  -36.0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   20,
@@ -524,10 +632,19 @@
               "Name": "Console",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   -74,
                   2.5,
-                  -25
+                  -25,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   2,
@@ -568,10 +685,19 @@
               "Name": "Floor",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   28,
                   0.5,
-                  -102
+                  -102,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   128,
@@ -593,10 +719,19 @@
               "Name": "Sign",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   28,
                   5,
-                  -143.0
+                  -143.0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   20,
@@ -666,10 +801,19 @@
               "Name": "Floor",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   -20,
                   1.2,
-                  -73
+                  -73,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   24,
@@ -691,10 +835,19 @@
               "Name": "OwnerSign",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   -20,
                   5,
-                  -80.0
+                  -80.0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   22,
@@ -758,10 +911,19 @@
               "Name": "Console",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   -20,
                   2.4,
-                  -67
+                  -67,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   2,
@@ -802,10 +964,19 @@
               "Name": "Floor",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   12,
                   1.2,
-                  -73
+                  -73,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   24,
@@ -827,10 +998,19 @@
               "Name": "OwnerSign",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   12,
                   5,
-                  -80.0
+                  -80.0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   22,
@@ -894,10 +1074,19 @@
               "Name": "Console",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   12,
                   2.4,
-                  -67
+                  -67,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   2,
@@ -938,10 +1127,19 @@
               "Name": "Floor",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   44,
                   1.2,
-                  -73
+                  -73,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   24,
@@ -963,10 +1161,19 @@
               "Name": "OwnerSign",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   44,
                   5,
-                  -80.0
+                  -80.0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   22,
@@ -1030,10 +1237,19 @@
               "Name": "Console",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   44,
                   2.4,
-                  -67
+                  -67,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   2,
@@ -1074,10 +1290,19 @@
               "Name": "Floor",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   76,
                   1.2,
-                  -73
+                  -73,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   24,
@@ -1099,10 +1324,19 @@
               "Name": "OwnerSign",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   76,
                   5,
-                  -80.0
+                  -80.0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   22,
@@ -1166,10 +1400,19 @@
               "Name": "Console",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   76,
                   2.4,
-                  -67
+                  -67,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   2,
@@ -1210,10 +1453,19 @@
               "Name": "Floor",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   -20,
                   1.2,
-                  -93
+                  -93,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   24,
@@ -1235,10 +1487,19 @@
               "Name": "OwnerSign",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   -20,
                   5,
-                  -100.0
+                  -100.0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   22,
@@ -1302,10 +1563,19 @@
               "Name": "Console",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   -20,
                   2.4,
-                  -87
+                  -87,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   2,
@@ -1346,10 +1616,19 @@
               "Name": "Floor",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   12,
                   1.2,
-                  -93
+                  -93,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   24,
@@ -1371,10 +1650,19 @@
               "Name": "OwnerSign",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   12,
                   5,
-                  -100.0
+                  -100.0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   22,
@@ -1438,10 +1726,19 @@
               "Name": "Console",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   12,
                   2.4,
-                  -87
+                  -87,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   2,
@@ -1482,10 +1779,19 @@
               "Name": "Floor",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   44,
                   1.2,
-                  -93
+                  -93,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   24,
@@ -1507,10 +1813,19 @@
               "Name": "OwnerSign",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   44,
                   5,
-                  -100.0
+                  -100.0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   22,
@@ -1574,10 +1889,19 @@
               "Name": "Console",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   44,
                   2.4,
-                  -87
+                  -87,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   2,
@@ -1618,10 +1942,19 @@
               "Name": "Floor",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   76,
                   1.2,
-                  -93
+                  -93,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   24,
@@ -1643,10 +1976,19 @@
               "Name": "OwnerSign",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   76,
                   5,
-                  -100.0
+                  -100.0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   22,
@@ -1710,10 +2052,19 @@
               "Name": "Console",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   76,
                   2.4,
-                  -87
+                  -87,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   2,
@@ -1754,10 +2105,19 @@
               "Name": "Floor",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   -20,
                   1.2,
-                  -113
+                  -113,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   24,
@@ -1779,10 +2139,19 @@
               "Name": "OwnerSign",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   -20,
                   5,
-                  -120.0
+                  -120.0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   22,
@@ -1846,10 +2215,19 @@
               "Name": "Console",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   -20,
                   2.4,
-                  -107
+                  -107,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   2,
@@ -1890,10 +2268,19 @@
               "Name": "Floor",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   12,
                   1.2,
-                  -113
+                  -113,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   24,
@@ -1915,10 +2302,19 @@
               "Name": "OwnerSign",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   12,
                   5,
-                  -120.0
+                  -120.0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   22,
@@ -1982,10 +2378,19 @@
               "Name": "Console",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   12,
                   2.4,
-                  -107
+                  -107,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   2,
@@ -2026,10 +2431,19 @@
               "Name": "Floor",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   44,
                   1.2,
-                  -113
+                  -113,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   24,
@@ -2051,10 +2465,19 @@
               "Name": "OwnerSign",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   44,
                   5,
-                  -120.0
+                  -120.0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   22,
@@ -2118,10 +2541,19 @@
               "Name": "Console",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   44,
                   2.4,
-                  -107
+                  -107,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   2,
@@ -2162,10 +2594,19 @@
               "Name": "Floor",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   76,
                   1.2,
-                  -113
+                  -113,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   24,
@@ -2187,10 +2628,19 @@
               "Name": "OwnerSign",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   76,
                   5,
-                  -120.0
+                  -120.0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   22,
@@ -2254,10 +2704,19 @@
               "Name": "Console",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   76,
                   2.4,
-                  -107
+                  -107,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   2,
@@ -2298,10 +2757,19 @@
               "Name": "Floor",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   -20,
                   1.2,
-                  -133
+                  -133,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   24,
@@ -2323,10 +2791,19 @@
               "Name": "OwnerSign",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   -20,
                   5,
-                  -140.0
+                  -140.0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   22,
@@ -2390,10 +2867,19 @@
               "Name": "Console",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   -20,
                   2.4,
-                  -127
+                  -127,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   2,
@@ -2434,10 +2920,19 @@
               "Name": "Floor",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   12,
                   1.2,
-                  -133
+                  -133,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   24,
@@ -2459,10 +2954,19 @@
               "Name": "OwnerSign",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   12,
                   5,
-                  -140.0
+                  -140.0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   22,
@@ -2526,10 +3030,19 @@
               "Name": "Console",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   12,
                   2.4,
-                  -127
+                  -127,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   2,
@@ -2570,10 +3083,19 @@
               "Name": "Floor",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   44,
                   1.2,
-                  -133
+                  -133,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   24,
@@ -2595,10 +3117,19 @@
               "Name": "OwnerSign",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   44,
                   5,
-                  -140.0
+                  -140.0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   22,
@@ -2662,10 +3193,19 @@
               "Name": "Console",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   44,
                   2.4,
-                  -127
+                  -127,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   2,
@@ -2706,10 +3246,19 @@
               "Name": "Floor",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   76,
                   1.2,
-                  -133
+                  -133,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   24,
@@ -2731,10 +3280,19 @@
               "Name": "OwnerSign",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   76,
                   5,
-                  -140.0
+                  -140.0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   22,
@@ -2798,10 +3356,19 @@
               "Name": "Console",
               "Properties": {
                 "Anchored": true,
-                "Position": [
+                "CFrame": [
                   76,
                   2.4,
-                  -127
+                  -127,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  1
                 ],
                 "Size": [
                   2,
@@ -2844,10 +3411,19 @@
           "Name": "SpawnToDock",
           "Properties": {
             "Anchored": true,
-            "Position": [
+            "CFrame": [
               0,
               0.5,
-              60
+              60,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1
             ],
             "Size": [
               14,
@@ -2869,10 +3445,19 @@
           "Name": "SouthWalk",
           "Properties": {
             "Anchored": true,
-            "Position": [
+            "CFrame": [
               -28,
               0.5,
-              58
+              58,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1
             ],
             "Size": [
               70,
@@ -2894,10 +3479,19 @@
           "Name": "WestWalk",
           "Properties": {
             "Anchored": true,
-            "Position": [
+            "CFrame": [
               -55,
               0.5,
-              4
+              4,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1
             ],
             "Size": [
               10,
@@ -2919,10 +3513,19 @@
           "Name": "NorthWalk",
           "Properties": {
             "Anchored": true,
-            "Position": [
+            "CFrame": [
               12,
               0.5,
-              -55
+              -55,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1
             ],
             "Size": [
               144,
@@ -2944,10 +3547,19 @@
           "Name": "EastWalk",
           "Properties": {
             "Anchored": true,
-            "Position": [
+            "CFrame": [
               54,
               0.5,
-              4
+              4,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1
             ],
             "Size": [
               12,
@@ -2975,10 +3587,19 @@
           "Name": "LakeGuard1",
           "Properties": {
             "Anchored": true,
-            "Position": [
+            "CFrame": [
               -27.5,
               8,
-              0.0
+              0.0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1
             ],
             "Size": [
               41.0,
@@ -3003,10 +3624,19 @@
           "Name": "LakeGuard2",
           "Properties": {
             "Anchored": true,
-            "Position": [
+            "CFrame": [
               27.5,
               8,
-              0.0
+              0.0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1
             ],
             "Size": [
               41.0,
@@ -3031,10 +3661,19 @@
           "Name": "LakeGuard3",
           "Properties": {
             "Anchored": true,
-            "Position": [
+            "CFrame": [
               0.0,
               8,
-              -11.0
+              -11.0,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              1
             ],
             "Size": [
               14.0,
@@ -3061,10 +3700,19 @@
       "Name": "Boundary",
       "Properties": {
         "Anchored": true,
-        "Position": [
+        "CFrame": [
           -107,
           8,
-          -24
+          -24,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
         ],
         "Size": [
           1,
@@ -3087,10 +3735,19 @@
       "Name": "Boundary",
       "Properties": {
         "Anchored": true,
-        "Position": [
+        "CFrame": [
           107,
           8,
-          -24
+          -24,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
         ],
         "Size": [
           1,
@@ -3113,10 +3770,19 @@
       "Name": "Boundary",
       "Properties": {
         "Anchored": true,
-        "Position": [
+        "CFrame": [
           0,
           8,
-          -145.5
+          -145.5,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
         ],
         "Size": [
           216,
@@ -3139,10 +3805,19 @@
       "Name": "Boundary",
       "Properties": {
         "Anchored": true,
-        "Position": [
+        "CFrame": [
           0,
           8,
-          97.5
+          97.5,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
         ],
         "Size": [
           216,

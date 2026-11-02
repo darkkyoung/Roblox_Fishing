@@ -4,6 +4,12 @@
 
 **현재 판정: 구현·자동 검사·빌드 완료 / 실제 Roblox Studio 실행 승인 전.** 이 작업 환경에는 Studio가 없어 실제 조작·물리·렌더링·실기기·클라우드 저장·실제 2인 플레이는 미검증입니다. 자동 테스트를 실제 플레이 성공으로 간주하지 않습니다.
 
+## P0 직렬화 핫픽스 (2026-11-02)
+
+초기 0.2 파일은 `Position`만 저장해 Windows Studio에서 Zone 배치 검증이 실패했습니다. **이 브랜치의 최신 빌드에는 75개 Part/SpawnLocation 모두 Rojo 7의 12성분 `CFrame`으로 저장됩니다.** 이전에 받은 0.2 파일 대신 새 `0.2-P0-hotfix` 배포 파일을 사용하세요. 게임 버전/밸런스/저장 스키마는 변경하지 않았습니다.
+
+수정 범위·파일 체크섬·정확한 Studio 부팅 QA는 [P0 핫픽스 보고서](docs/P0_SERIALIZATION_HOTFIX.md)에 있습니다. 실제 Studio 재실행은 이 작업 환경에서 **미실행**입니다. 기존 58개 테스트와 별개로 직렬화 7개·부팅 API 대체 객체 검사 3개가 통과했습니다.
+
 ## 바로 실행
 
 1. `build/FILAMENT-Fishing-0.2.rbxl` 또는 `build/FILAMENT-Fishing-0.2.rbxlx`를 내려받아 **Roblox Studio → 파일 열기**로 엽니다.
@@ -106,7 +112,7 @@ Rojo 설치·플러그인·외부 모델·수동 오브젝트 배치가 필요�
 
 ## 빌드·테스트
 
-바로 플레이에는 개발 도구가 필요 없습니다. 개발용 고정 버전은 **Rojo 7.7.1 / Luau 0.743 / Python 3**입니다.
+바로 플레이에는 개발 도구가 필요 없습니다. 개발용 고정 버전은 **Rojo 7.7.1 / Luau 0.743 / Python 3 / [rbxmk 0.9.1](https://github.com/Anaminus/rbxmk/releases/tag/v0.9.1)**입니다.
 
 ```bash
 bash scripts/build.sh
@@ -119,18 +125,20 @@ Windows PowerShell:
 ./scripts/build.ps1
 python scripts/run_tests.py
 luau tests/functional.spec.luau
+python tests/serialization.spec.py
+python scripts/test_boot.py
 python scripts/validate_place.py
 ```
 
-Luau 정적 검사: `luau-analyze src/shared/*.lua src/server/*.lua src/client/*.lua`. `scripts/check.sh`는 소스 컴파일도 수행합니다. `LUAU_BIN` 환경 변수로 규칙 테스트 실행 파일 경로를 지정할 수 있습니다.
+Luau 정적 검사: `luau-analyze src/shared/*.lua src/server/*.lua src/client/*.lua`. `scripts/check.sh`는 소스 컴파일도 수행합니다. `LUAU_BIN` 환경 변수로 규칙 테스트 실행 파일 경로를 지정할 수 있습니다. `rbxmk`를 PATH에 추가하거나 `RBXMK_BIN`으로 지정하세요. `validate_place.py`는 실제 `.rbxl`을 rbxmk로 독립 역직렬화하여 `.rbxlx` 및 원본 설정과 대조합니다. 도구가 없으면 검증은 실패하며 바이너리 검사를 생략하지 않습니다.
 
-검증: **기존 30개 + 새 28개 = 58개 자동 테스트 통과**, Luau 분석·컴파일 및 Rojo 두 형식 빌드 통과. 결과 원문은 `build/test-output-0.2.txt`, 기능별 구분은 [결과 보고서](docs/PHASE_0.2_REPORT.md), 실제 시나리오는 [Studio QA](docs/QA_0.2.md)입니다. 기존 테스트 중 레이아웃 1개만 새 UI 구조에 맞춰 수정했습니다. 테스트의 저장 어댑터는 모의 구현이며 실제 Roblox API 호출이 아닙니다.
+검증: **기존 30개 + 새 28개 = 58개 자동 테스트 통과**, Luau 분석·컴파일 및 Rojo 두 형식 빌드 통과. P0 수정 후 재검증 원문은 `build/test-output-0.2-p0.txt`, 기능별 구분은 [결과 보고서](docs/PHASE_0.2_REPORT.md), 실제 시나리오는 [Studio QA](docs/QA_0.2.md)입니다. 기존 테스트 중 레이아웃 1개만 새 UI 구조에 맞춰 수정했습니다. 테스트의 저장 어댑터는 모의 구현이며 실제 Roblox API 호출이 아닙니다.
 
 ## 버전·GitHub 보존
 
 - Canonical: https://github.com/darkkyoung/Roblox_Fishing
 - fresh fetch한 기준 main: `857fa5c95357908fa022e6f61417b6e773432765`
-- 새 브랜치: `feature/fishing-functional-blockout`
+- 작업 브랜치: `feature/fishing-functional-blockout` / [Draft PR #2](https://github.com/darkkyoung/Roblox_Fishing/pull/2)
 - 0.1.1 브랜치와 [Draft PR #1](https://github.com/darkkyoung/Roblox_Fishing/pull/1)은 변경하지 않았습니다. 0.1.1의 UI 전용 14개 테스트도 해당 브랜치에 보존됩니다.
 - `Domain`, `FishingMachine`, `Catalog`, `ProfileStore`, `Lease`는 기준 main과 동일합니다. Config의 밸런스는 유지하고 지리 정보만 Zone 설정으로 분리했습니다.
 - 이번 최종 커밋·새 PR·체크섬은 전달 ZIP의 `DELIVERY.md`에 있습니다. main 병합이나 Roblox 공개 배포는 하지 않습니다.
