@@ -1,42 +1,52 @@
+-- Basic display only: one simple model per item; no effects, previews or decoration.
 local Players=game:GetService("Players")
 local RunService=game:GetService("RunService")
-local visuals=workspace:WaitForChild("Visuals")
-local tracked={}
-local function add(model)
-    if model:IsA("Model") and model:GetAttribute("VisualKind") then tracked[model]=true end
+local localPlayer=Players.LocalPlayer
+local visuals=workspace:WaitForChild("CollectionVisuals",15)
+if not visuals then
+    local status=game:GetService("ReplicatedStorage")
+    warn("[FILAMENT CLIENT] CollectionVisuals unavailable. Boot="..tostring(status:GetAttribute("FilamentBootStatus"))
+        .."; stage="..tostring(status:GetAttribute("FilamentBootStage")).."; "..tostring(status:GetAttribute("FilamentBootError")))
+    return
 end
-for _,v in ipairs(visuals:GetDescendants()) do add(v) end
-visuals.DescendantAdded:Connect(add)
-visuals.DescendantRemoving:Connect(function(v) tracked[v]=nil end)
+local tracked={}
+local function add(m) if m:IsA("Model") and m:GetAttribute("VisualKind") then tracked[m]=true end end
+for _,m in ipairs(visuals:GetDescendants()) do add(m) end
+visuals.DescendantAdded:Connect(add);visuals.DescendantRemoving:Connect(function(m) tracked[m]=nil end)
+-- Visibility is a convenience; the server independently checks ownership and distance.
+for _,node in ipairs(workspace:WaitForChild("World"):WaitForChild("Zones"):GetChildren()) do
+    if string.sub(node.Name,1,12)=="AquariumPlot" then
+        local prompt=node:WaitForChild("Console"):WaitForChild("Prompt")
+        local function refresh() prompt.Enabled=node:GetAttribute("OwnerUserId")==localPlayer.UserId end
+        node:GetAttributeChangedSignal("OwnerUserId"):Connect(refresh);refresh()
+    end
+end
 local elapsed=0
 RunService.RenderStepped:Connect(function(dt)
-    elapsed+=dt
-    if elapsed<1/30 then return end
-    elapsed=0
-    local now=workspace:GetServerTimeNow()
-    for model in pairs(tracked) do
-        if not model.Parent then tracked[model]=nil;continue end
-        local kind=model:GetAttribute("VisualKind")
-        if kind=="follower" then
-            local owner=Players:GetPlayerByUserId(model:GetAttribute("OwnerUserId"))
-            local root=owner and owner.Character and owner.Character:FindFirstChild("HumanoidRootPart")
+    elapsed+=dt;if elapsed<.05 then return end
+    local step=elapsed;elapsed=0;local now=workspace:GetServerTimeNow()
+    for m in pairs(tracked) do
+        if not m.Parent then tracked[m]=nil;continue end
+        if m:GetAttribute("VisualKind")=="follower" then
+            local owner=Players:GetPlayerByUserId(m:GetAttribute("OwnerUserId"));local root=owner and owner.Character and owner.Character:FindFirstChild("HumanoidRootPart")
             if root then
-                local target=root.CFrame*CFrame.new(3,1+math.sin(now*2)*.35,3)
-                model:PivotTo(model:GetPivot():Lerp(target,.18))
+                local target=root.CFrame*CFrame.new(2.5,.5,3)
+                m:PivotTo((m:GetPivot().Position-target.Position).Magnitude>30 and target or m:GetPivot():Lerp(target,1-math.exp(-8*step)))
             end
-        else
-            local center=model:GetAttribute("TankCenter")
-            local i=model:GetAttribute("SwimIndex") or 1
-            if center then
-                if kind=="fish" then
-                    local t=now*.45+i*1.7
-                    local pos=center+Vector3.new(math.cos(t)*7,math.sin(t*.7+i)*1.2,math.sin(t)*3.2)
-                    local nextPos=center+Vector3.new(math.cos(t+.08)*7,math.sin((t+.08)*.7+i)*1.2,math.sin(t+.08)*3.2)
-                    model:PivotTo(CFrame.lookAt(pos,nextPos))
-                else
-                    model:PivotTo(CFrame.new(center+Vector3.new(((i-1)%5-2)*3.4,-1+math.sin(now+i)*.15,2))*CFrame.Angles(0,now*.35,0))
-                end
-            end
+        elseif m:GetAttribute("VisualKind")=="fish" then
+            local p=m:GetAttribute("SlotPosition")
+            if p then m:PivotTo(CFrame.new(p+Vector3.new(math.sin(now+(m:GetAttribute("SlotIndex") or 0))*.5,0,0))) end
         end
     end
 end)
+local function camera(character)
+    local root=character:WaitForChild("HumanoidRootPart",8);local human=character:WaitForChild("Humanoid",8)
+    if not root or not human then return end
+    RunService.RenderStepped:Wait();local c=workspace.CurrentCamera
+    if c and localPlayer.Character==character then
+        c.CameraType=Enum.CameraType.Scriptable;c.CameraSubject=human
+        c.CFrame=CFrame.lookAt(root.Position+Vector3.new(0,10,18),root.Position+Vector3.new(0,0,-20));c.Focus=root.CFrame
+        RunService.RenderStepped:Wait();c.CameraType=Enum.CameraType.Custom
+    end
+end
+localPlayer.CharacterAdded:Connect(camera);if localPlayer.Character then task.spawn(camera,localPlayer.Character) end

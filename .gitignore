@@ -5,5 +5,8 @@
 *.log
 tools/
 tests/_generated.luau
+tests/_boot_generated.luau
+__pycache__/
+build/.place-validation-*/
 build/FILAMENT-source.bundle
 SOURCE_COMMIT.txt

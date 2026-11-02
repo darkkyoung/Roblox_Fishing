@@ -1,209 +1,158 @@
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
-local HttpService = game:GetService("HttpService")
-local Shared = ReplicatedStorage:WaitForChild("Shared")
-local Config = require(Shared.Config)
-local Catalog = require(Shared.Catalog)
-local Util = require(Shared.Util)
-local Domain = require(Shared.Domain).new(Config,Catalog,Util)
-local World = require(script.Parent.WorldService).new()
-
-local remotes = Instance.new("Folder")
-remotes.Name = "Remotes"
-local function remote(name)
-    local r = Instance.new("RemoteEvent");r.Name = name;r.Parent = remotes;return r
+-- Boot diagnostics are replicated even when a required service fails.
+local bootState=game:GetService("ReplicatedStorage")
+bootState:SetAttribute("FilamentBootStatus","Starting")
+bootState:SetAttribute("FilamentBootError",nil)
+local function stage(name)
+    bootState:SetAttribute("FilamentBootStage",name)
+    print("[FILAMENT BOOT] Starting "..name)
 end
-local Action = remote("Action")
-local Input = remote("FishingInput")
-local FishingState = remote("FishingState")
-local Snapshot = remote("Snapshot")
-local Notice = remote("Notice")
-local SaveStatus = remote("SaveStatus")
-local OpenPanel = remote("OpenPanel")
-remotes.Parent = ReplicatedStorage
-
-local function tell(player,key) if player.Parent then Notice:FireClient(player,key) end end
-local Store = require(script.Parent.ProfileStore).new(Domain,function(player,status)
-    if player.Parent then SaveStatus:FireClient(player,status) end
-end)
-local function sync(player)
-    local profile = Store.profiles[player]
-    if not profile or not player.Parent then return end
-    local data = Util.clone(profile.data)
-    for _,item in pairs(data.items) do item.seed = nil end -- persisted server-only roll
-    data.saveStatus = profile.status
-    data.debugEnabled = RunService:IsStudio() and Config.StudioDebug
-    data.serverTime = os.time()
-    data.plotName = World.plots[player] and World.plots[player].Name
-    Snapshot:FireClient(player,data)
-    World:sync(player,profile.data)
-end
-local Fishing = require(script.Parent.FishingService).new(Store,Domain,FishingState,sync,tell)
-
-local buckets = {}
-local function allow(player,lane,rate,capacity)
-    buckets[player] = buckets[player] or {}
-    local now = os.clock()
-    local b = buckets[player][lane] or {tokens=capacity,at=now}
-    b.tokens = math.min(capacity,b.tokens+(now-b.at)*rate);b.at = now
-    buckets[player][lane] = b
-    if b.tokens < 1 then return false end
-    b.tokens -= 1;return true
-end
-local function root(player)
-    local character = player.Character
-    local human = character and character:FindFirstChildOfClass("Humanoid")
-    return human and human.Health>0 and character:FindFirstChild("HumanoidRootPart") or nil
-end
-local function near(player,position)
-    local r = root(player)
-    return r and (r.Position-position).Magnitude <= Config.StationRadius
-end
-local aquariumActions = {place=true,retrieve=true,upgrade=true}
-local allowedActions = {place=true,retrieve=true,upgrade=true,sell=true,craft=true,equip=true,unequip=true}
-local function hatch(player)
-    local p = Store.profiles[player]
-    if not p or p.closed or p.busy then return end
-    local ready = false
-    for _,item in pairs(p.data.items) do
-        if item.kind=="egg" and item.location=="aquarium" and item.readyAt <= os.time() then ready=true;break end
+local function boot()
+    stage("Shared modules")
+    local Players=game:GetService("Players")
+    local ReplicatedStorage=game:GetService("ReplicatedStorage")
+    local RunService=game:GetService("RunService")
+    local HttpService=game:GetService("HttpService")
+    local Shared=ReplicatedStorage:WaitForChild("Shared",10)
+    assert(Shared,"Missing ReplicatedStorage.Shared; rebuild the place.")
+    local Config=require(Shared.Config)
+    local Util=require(Shared.Util)
+    local Domain=require(Shared.Domain).new(Config,require(Shared.Catalog),Util)
+    local Debug=require(script.Parent.StudioTools)
+    stage("ZoneService")
+    local Zones=require(script.Parent.ZoneService).new()
+    stage("WorldService / CollectionVisuals")
+    local World=require(script.Parent.WorldService).new(Zones)
+    local Rewards=require(script.Parent.RewardService).new(Domain,Config,Util)
+    stage("Remotes")
+    assert(not ReplicatedStorage:FindFirstChild("Remotes"),"Duplicate FILAMENT server bootstrap")
+    local remotes=Instance.new("Folder");remotes.Name="Remotes"
+    local function remote(name) local r=Instance.new("RemoteEvent");r.Name=name;r.Parent=remotes;return r end
+    local Action=remote("Action");local Input=remote("FishingInput");local State=remote("FishingState")
+    local Snapshot=remote("Snapshot");local Notice=remote("Notice");local SaveStatus=remote("SaveStatus");local OpenPanel=remote("OpenPanel")
+    remotes.Parent=ReplicatedStorage
+    local function tell(player,key) if player.Parent then Notice:FireClient(player,key) end end
+    stage("ProfileStore")
+    local Store=require(script.Parent.ProfileStore).new(Domain,function(player,status) if player.Parent then SaveStatus:FireClient(player,status) end end)
+    local counters={}
+    local function sync(player)
+        local p=Store.profiles[player];if not p or not player.Parent then return end
+        local data=Util.clone(p.data)
+        for _,item in pairs(data.items) do item.seed=nil;item.ownerUserId=player.UserId end
+        data.plotId=World.plots[player];data.saveStatus=p.status;data.serverTime=os.time()
+        data.debugEnabled=Debug.enabled(RunService:IsStudio(),Config.StudioDebug);data.sessionStats=counters[player] or {catches=0,debug=0}
+        Snapshot:FireClient(player,data);World:sync(player,p.data)
     end
-    if not ready then return end
-    local ok = Store:transaction(player,function(data)
-        local results = Domain.hatch(data,os.time())
-        return #results>0,results
-    end)
-    if ok then sync(player);tell(player,"hatched") end
-end
-
-Input.OnServerEvent:Connect(function(player,action)
-    if type(action) ~= "string" or #action > 20 or not allow(player,"input",22,30) then return end
-    if action=="start" or action=="release" or action=="hold" or action=="stopHold" or action=="tap" or action=="cancel" then
-        Fishing:input(player,action)
-    end
-end)
-Action.OnServerEvent:Connect(function(player,action,id,option)
-    if type(action)~="string" or #action>24 then return end
-    if id~=nil and (type(id)~="string" or #id>64) then return end
-    if option~=nil and (type(option)~="string" or #option>20) then return end
-    if not allow(player,"action",2,5) then return end
-    local p = Store.profiles[player]
-    if not p or p.closed then tell(player,"notReady");return end
-    if action=="sync" then sync(player);return end
-    if action=="rod" then
-        local r = root(player)
-        if r then
-            local t = player.Backpack:FindFirstChild("FilamentRod")
-            if t then player.Character:FindFirstChildOfClass("Humanoid"):EquipTool(t) end
-        end
-        return
-    end
-    if action=="travel" then
-        if not allow(player,"travel",.5,1) then return end
-        local r = root(player)
-        local plot = World.plots[player]
-        if not r or not plot then return end
-        local destinations = {dock=Vector3.new(0,5,23),aquarium=plot.Arrival.Position+Vector3.new(0,2,0),shop=Vector3.new(-28,5,52),craft=Vector3.new(28,5,52)}
-        local destination = destinations[id]
-        if destination then
-            Fishing:cancel(player,true)
-            FishingState:FireClient(player,{phase="Idle"})
-            player.Character:PivotTo(CFrame.lookAt(destination,destination+Vector3.new(0,0,-1)))
-        end
-        return
-    end
-    if action=="debugPack" or action=="debugHatch" then
-        if not RunService:IsStudio() or not Config.StudioDebug then return end
-        local ok,reason = Store:transaction(player,function(data)
-            if action=="debugPack" then
-                if Util.count(data.items)+4>Config.InventoryLimit then return false,"full" end
-                for _,species in ipairs({"silver","sunny","azure","tideEgg"}) do
-                    Domain.grant(data,species,HttpService:GenerateGUID(false),Random.new():NextInteger(1,2147483646),os.time())
-                end
-                data.coins += 500
-                data.feed.basic += 3;data.feed.premium += 3
-            else
-                for _,item in pairs(data.items) do
-                    if item.kind=="egg" and item.location=="aquarium" then
-                        local duration=item.readyAt-item.startedAt
-                        item.readyAt=os.time();item.startedAt=item.readyAt-duration
-                    end
-                end
-            end
-            return true,"debugDone"
-        end)
-        if ok then sync(player) end;tell(player,reason);return
-    end
-    if not allowedActions[action] then return end
-    if Fishing.sessions[player] then tell(player,"finishFishing");return end
-    if not root(player) then tell(player,"notReady");return end
-    if aquariumActions[action] then
-        local plot = World.plots[player]
-        if not plot or not near(player,plot.Anchor.Position) then tell(player,"goAquarium");return end
-    elseif action=="sell" and not near(player,World.world.Shop.Position) then tell(player,"goShop");return
-    elseif action=="craft" and not near(player,World.world.Craft.Position) then tell(player,"goCraft");return end
-    local ok,reason = Store:transaction(player,function(data) return Domain.apply(data,action,id,option,os.time()) end)
-    if ok then sync(player) end
-    tell(player,reason)
-end)
-
-for _,pair in ipairs({{World.world.Shop,"fish"},{World.world.Craft,"fish"}}) do
-    pair[1].Prompt.Triggered:Connect(function(player)
-        if near(player,pair[1].Position) then OpenPanel:FireClient(player,pair[2]) end
-    end)
-end
-for _,plot in ipairs(World.world.Aquariums:GetChildren()) do
-    local prompt=Instance.new("ProximityPrompt")
-    prompt.ActionText="수족관 / Aquarium";prompt.ObjectText="FILAMENT";prompt.RequiresLineOfSight=false;prompt.MaxActivationDistance=14
-    prompt.Parent=plot.UpgradeConsole
-    prompt.Triggered:Connect(function(player)
-        if World.plots[player]==plot and near(player,plot.Anchor.Position) then OpenPanel:FireClient(player,"tank") end
-    end)
-end
-local function joined(player)
-    if not World:assign(player) then player:Kick("FILAMENT PoC: 수족관 16개가 모두 사용 중입니다. / Server full.");return end
-    local function characterAdded()
-        Fishing:cancel(player,true)
-        task.wait(.4)
-        World:rod(player)
-        local p=Store.profiles[player]
-        if p then sync(player) end
-    end
-    player.CharacterAdded:Connect(characterAdded)
-    if player.Character then task.spawn(characterAdded) end
-    local p = Store:load(player)
-    if p then
-        if not player.Parent then Store:release(player);World:release(player);return end
-        hatch(player)
+    stage("FishingService")
+    local Fishing=require(script.Parent.FishingService).new(Store,Domain,Rewards,Zones,State,function(player)
+        if counters[player] then counters[player].catches+=1 end
         sync(player)
+    end,tell)
+    stage("Handlers")
+    local buckets={}
+    local function allow(player,lane,rate,capacity)
+        buckets[player]=buckets[player] or {};local now=os.clock()
+        local b=buckets[player][lane] or {tokens=capacity,at=now}
+        b.tokens=math.min(capacity,b.tokens+(now-b.at)*rate);b.at=now;buckets[player][lane]=b
+        if b.tokens<1 then return false end;b.tokens-=1;return true
     end
-end
-Players.PlayerAdded:Connect(joined)
-for _,player in ipairs(Players:GetPlayers()) do task.spawn(joined,player) end
-Players.PlayerRemoving:Connect(function(player)
-    Fishing:cancel(player,true)
-    Fishing.cooldowns[player]=nil
-    buckets[player]=nil
-    World:release(player)
-    Store:release(player)
-end)
-task.spawn(function()
-    while not Store.closing do
-        task.wait(1)
-        for player in pairs(Store.profiles) do
-            task.spawn(function() hatch(player);Store:renew(player) end)
+    local function hatch(player)
+        local p=Store.profiles[player];if not p or p.closed or p.busy then return end
+        local ready=false
+        for _,item in pairs(p.data.items) do if item.kind=="egg" and item.location=="aquarium" and item.readyAt<=os.time() then ready=true;break end end
+        if not ready then return end
+        local ok=Store:transaction(player,function(data) local results=Rewards.hatch(data,os.time());return #results>0,results end)
+        if ok then sync(player);tell(player,"hatched") end
+    end
+    Input.OnServerEvent:Connect(function(player,action)
+        if type(action)~="string" or #action>20 or not allow(player,"input",22,30) then return end
+        if action=="start" or action=="release" or action=="hold" or action=="stopHold" or action=="tap" or action=="cancel" then Fishing:input(player,action) end
+    end)
+    Action.OnServerEvent:Connect(function(player,action,id,option)
+        if type(action)~="string" or #action>24 or (id~=nil and (type(id)~="string" or #id>64)) or (option~=nil and (type(option)~="string" or #option>20)) then return end
+        if not allow(player,"action",2,5) then return end
+        local profile=Store.profiles[player];if not profile or profile.closed then tell(player,"notReady");return end
+        if action=="sync" then sync(player);return end
+        local position,root=Zones:position(player);if not root then tell(player,"notReady");return end
+        if action=="rod" then
+            local rod=player.Backpack:FindFirstChild(Zones.config.rodName)
+            if rod then player.Character:FindFirstChildOfClass("Humanoid"):EquipTool(rod) end
+            return
+        end
+        if action=="travel" then
+            if not Debug.enabled(RunService:IsStudio(),Config.StudioDebug) or not allow(player,"travel",.5,1) then return end
+            local destination=id=="aquarium" and World.plots[player] or id
+            local permitted={SpawnPlaza=true,FishingDock=true,FishMarket=true,FeedWorkshop=true,AquariumGarden=true}
+            if id~="aquarium" and not permitted[id] then return end
+            local zone=Zones.config.zones[destination];if not zone then return end
+            Fishing:cancel(player,true);State:FireClient(player,{phase="Idle"})
+            local v=Vector3.new(unpack(zone.arrival));player.Character:PivotTo(CFrame.lookAt(v,v+Vector3.new(0,0,-1)))
+            return
+        end
+        if string.sub(action,1,5)=="debug" then
+            if not Debug.enabled(RunService:IsStudio(),Config.StudioDebug) then return end
+            if Fishing:busy(player) then tell(player,"finishFishing");return end
+            local ok,reason=Store:transaction(player,function(data)
+                return Debug.apply(data,action,option,os.time(),Domain,function() return HttpService:GenerateGUID(false) end,
+                    function() return Random.new():NextInteger(1,2147483646) end,RunService:IsStudio(),Config.StudioDebug,Config.Aquarium)
+            end)
+            if ok then counters[player].debug+=1;sync(player);hatch(player) end
+            tell(player,reason);return
+        end
+        if Fishing:busy(player) then tell(player,"finishFishing");return end
+        local allowed,reason=Zones.rules.authorize(action,position,World.plots[player])
+        if not allowed then tell(player,reason);return end
+        local ok,result=Store:transaction(player,function(data) return Domain.apply(data,action,id,option,os.time()) end)
+        if ok then sync(player) end;tell(player,result)
+    end)
+    for id,zone in pairs(Zones.config.zones) do
+        if zone.type=="market" or zone.type=="workshop" or zone.type=="plot" then
+            Zones.world[id].Console.Prompt.Triggered:Connect(function(player)
+                if not Store.profiles[player] or not allow(player,"prompt",2,3) then return end
+                if zone.type=="plot" and World.plots[player]~=id then return end
+                if not Zones.rules.interact(id,Zones:position(player)) then return end
+                OpenPanel:FireClient(player,zone.type=="plot" and "tank" or "fish")
+            end)
         end
     end
-end)
-game:BindToClose(function()
-    Store.closing=true
-    local count=0
-    for player in pairs(Store.profiles) do
-        count+=1
-        task.spawn(function() Store:release(player);count-=1 end)
+    local function joined(player)
+        if counters[player] then return end
+        counters[player]={catches=0,debug=0}
+        if not World:assign(player) then player:Kick("FILAMENT: 16 plots are occupied.");return end
+        local function characterAdded()
+            Fishing:cancel(player,true);State:FireClient(player,{phase="Idle"})
+            task.wait(.4);World:rod(player);sync(player)
+        end
+        player.CharacterAdded:Connect(characterAdded);if player.Character then task.spawn(characterAdded) end
+        local profile=Store:load(player)
+        if profile then
+            if not player.Parent then Store:release(player);World:release(player);return end
+            hatch(player);sync(player)
+        end
     end
-    local deadline=os.clock()+25
-    while count>0 and os.clock()<deadline do task.wait(.1) end
-end)
-print("[FILAMENT] Fishing PoC "..Config.Version.." ready. Mode: "..(Store.memory and "STUDIO MEMORY" or "DATASTORE"))
+    Players.PlayerAdded:Connect(joined);for _,p in ipairs(Players:GetPlayers()) do task.spawn(joined,p) end
+    Players.PlayerRemoving:Connect(function(player)
+        Fishing:cancel(player,true);Fishing.cooldowns[player]=nil;Fishing.pending[player]=nil
+        buckets[player]=nil;counters[player]=nil;World:release(player);Store:release(player)
+    end)
+    task.spawn(function()
+        while not Store.closing do
+            task.wait(1)
+            for player in pairs(Store.profiles) do task.spawn(function() hatch(player);Store:renew(player) end) end
+        end
+    end)
+    game:BindToClose(function()
+        Store.closing=true;local count=0
+        for player in pairs(Store.profiles) do count+=1;task.spawn(function() Store:release(player);count-=1 end) end
+        local deadline=os.clock()+25;while count>0 and os.clock()<deadline do task.wait(.1) end
+    end)
+    print("[FILAMENT] Functional Blockout "..Config.Version.." / "..(Store.memory and "STUDIO MEMORY" or "DATASTORE"))
+end
+local ok,reason=xpcall(boot,debug.traceback)
+if not ok then
+    bootState:SetAttribute("FilamentBootStatus","Failed")
+    bootState:SetAttribute("FilamentBootError",tostring(reason))
+    error("[FILAMENT BOOT] FAILED at "..tostring(bootState:GetAttribute("FilamentBootStage")).."\n"..tostring(reason),0)
+end
+bootState:SetAttribute("FilamentBootStage","Ready")
+bootState:SetAttribute("FilamentBootStatus","Ready")
+print("[FILAMENT BOOT] READY: Remotes and CollectionVisuals created; player handlers connected")

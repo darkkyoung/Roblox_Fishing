@@ -1,0 +1,64 @@
+PASS All catch rewards reachable with configured 5% egg probability
+PASS Unique item award cannot be replayed
+PASS Inventory bound prevents overflows
+PASS Sell is exactly once and credits correct coins
+PASS Placed fish cannot be sold or consumed until retrieved
+PASS Premium feed recipe consumes exactly one eligible fish
+PASS Two profiles cannot operate each other's identifiers
+PASS Tank capacity and upgrades enforce costs and limits
+PASS Egg placement validates feed before consuming or starting
+PASS Unfed egg uses 60 seconds and hatch frees tank capacity
+PASS Offline elapsed time hatches once without reroll on reconnect
+PASS Higher feed and level improve both upper-rarity probabilities
+PASS Incubation time influences odds and placement snapshots level
+PASS All three pets reachable including legendary at level one
+PASS Only pets equip; one slot; buff reaches actual fishing simulation
+PASS Server charge duration bounds power and waits for flight then bite
+PASS One resistance gate and valid taps allow full catch
+PASS Late or spammed resistance taps cannot win
+PASS Hold expires, stalls cannot jump progress, stale sessions expire
+PASS Lease prevents simultaneous owners and expired writers
+PASS Lease supports same-revision retries and rejects old revisions
+PASS Schema validation refuses future or malformed data
+PASS Responsive containers fit portrait, landscape and desktop safe areas
+PASS Korean and English catalogs have matching translation keys
+PASS Persistent profile commits before exposing data; reload restores inventory
+PASS Transient failure retries; ambiguous commit does not duplicate reward
+PASS Persistent failure freezes session without exposing unsaved candidate
+PASS Busy transactions reject concurrent item consumption
+PASS Studio temporary mode never accesses a cloud key
+PASS Offline hatch persists once across durable reconnects
+
+30 tests passed. Luau logic + mocked storage; NOT Studio execution.
+PASS Geography: south spawn, southwest market, northwest workshop, north garden
+PASS All 16 plot slots lie inside the separate garden
+PASS Only dock permits casting, including height and malformed-position rejection
+PASS All dock corners and casting powers land on exposed lake, never under dock
+PASS Water check rejects dry ground, wrong elevation and dock overlap
+PASS Station actions require correct zone bounds AND prompt distance
+PASS Player cannot place/retrieve/upgrade while standing on another plot
+PASS 16 distinct session allocations; 17th refused; leaving releases only own plot
+PASS Display slots are unique, bounded and independent between two owners
+PASS Integrated normal catch reaches each fish and egg reward without debug
+PASS Failed resistance produces no reward proposal
+PASS Same prepared reward cannot be granted twice
+PASS Integrated fish: capture, place, retrieve, sell; wrong zone and duplicate refused
+PASS Integrated craft consumes exactly one fish at workshop
+PASS Integrated egg, crafted feed, timed hatch, pet equip and actual fishing multipliers
+PASS Two profile inventories remain isolated even at permitted station
+PASS Upgrade uses own zone and unchanged cost/capacity
+PASS Every debug mutation is refused on live and with StudioDebug false
+PASS Separate debug fish/egg/feed/coin controls have bounded exact grants
+PASS Debug level rejects overflow, invalid input, and lowering below current occupancy
+PASS Debug instant hatch preserves incubation weights and labels result as DEBUG
+PASS Idle, waiting and finished states do not expose a fishing meter
+PASS Bag/native menu excludes all fishing controls; absent rod has no idle action
+PASS Input intent cannot advance waiting or convert hold into repeated resistance taps
+PASS UI exposes only zone-relevant actions and valid fish recipes
+PASS Incubating eggs have no retrieve action and pet slot has equip/unequip only
+PASS Touch meter, action, cancel targets stay separated in portrait and landscape
+PASS Compact HUD stays within native topbar free space with an accessible bag
+28 functional integration / zone / presentation tests passed; NOT Studio execution.
+PASS place: 193 instances, 22 zones, 16 plots, 18 prompts, 22 exact source matches
+PASS single server bootstrap, two client scripts, flat-only geometry, lake safety coverage (structural)
+XML SHA256: bbc15f2949fca04d75a43616b4510b4e8fa11a870afadeba2c86dd85dfaeac6a
