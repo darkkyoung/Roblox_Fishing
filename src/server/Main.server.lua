@@ -5,6 +5,8 @@ local HttpService = game:GetService("HttpService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Catalog = require(Shared.Catalog)
+local Visual = require(Shared.VisualConfig)
+local Presentation = require(Shared.Presentation)
 local Util = require(Shared.Util)
 local Domain = require(Shared.Domain).new(Config,Catalog,Util)
 local World = require(script.Parent.WorldService).new()
@@ -94,17 +96,18 @@ Action.OnServerEvent:Connect(function(player,action,id,option)
     if action=="rod" then
         local r = root(player)
         if r then
-            local t = player.Backpack:FindFirstChild("FilamentRod")
+            local t = player.Backpack:FindFirstChild(Visual.RodName)
             if t then player.Character:FindFirstChildOfClass("Humanoid"):EquipTool(t) end
         end
         return
     end
     if action=="travel" then
+        if not Presentation.canDebug(RunService:IsStudio(),Config.StudioDebug) then return end
         if not allow(player,"travel",.5,1) then return end
         local r = root(player)
         local plot = World.plots[player]
         if not r or not plot then return end
-        local destinations = {dock=Vector3.new(0,5,23),aquarium=plot.Arrival.Position+Vector3.new(0,2,0),shop=Vector3.new(-28,5,52),craft=Vector3.new(28,5,52)}
+        local destinations = {dock=Vector3.new(0,5,23),aquarium=plot.Arrival.Position+Vector3.new(0,2,0),shop=World.world.Shop.Position+Vector3.new(0,2,5),craft=World.world.Craft.Position+Vector3.new(0,2,5)}
         local destination = destinations[id]
         if destination then
             Fishing:cancel(player,true)

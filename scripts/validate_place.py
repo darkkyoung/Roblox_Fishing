@@ -3,7 +3,7 @@ from pathlib import Path
 import xml.etree.ElementTree as ET
 import hashlib, json
 root=Path(__file__).resolve().parents[1]
-place=root/'build/FILAMENT-Fishing-0.1.rbxlx'
+place=root/'build/FILAMENT-Fishing-0.1.1.rbxlx'
 tree=ET.parse(place)
 items=tree.findall('.//Item')
 def prop(item,name):
@@ -14,7 +14,7 @@ def name(item):
 classes={}
 for item in items: classes[item.attrib['class']]=classes.get(item.attrib['class'],0)+1
 assert classes.get('SpawnLocation')==1
-assert classes.get('Part',0)>=230
+assert classes.get('Part',0)>=800
 plots=[i for i in items if i.attrib['class']=='Model' and name(i).startswith('Plot')]
 assert len(plots)==16
 for plot in plots:
@@ -27,7 +27,7 @@ expected={p.read_text().replace('\r\n','\n') for p in sources}
 actual={prop(i,'Source').text.replace('\r\n','\n') for i in scripts}
 assert expected==actual,'Embedded Luau differs from source tree'
 assert classes.get('Script')==1
-assert classes.get('LocalScript')==2
+assert classes.get('LocalScript')==3
 assert not any(i.attrib['class'] in ('HttpService','MarketplaceService') for i in items)
 print(f'PASS place structure: {len(items)} instances, {len(plots)} aquariums, {len(scripts)} exact source matches')
 print('PASS spawn, aquarium anchors, script classes, zero external assets required')
